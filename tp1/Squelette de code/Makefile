@@ -15,10 +15,10 @@ OBJETS=$(SOURCES:%.cpp=%.o)
 
 #Compilateur et options de compilation
 CCPP=g++
-CFLAGS=-Wall -ansi -pedantic -ffast-math -I /usr/X11R6/include
+CFLAGS=-Wall -ansi -pedantic -ffast-math -I /usr/X11R6/include -std=c++11
 
 
-LFLAGS= -L . -L /usr/X11R6/lib  -lpthread -lX11 -lXext -Dcimg_use_xshm  -lm
+LFLAGS= -L . -L /usr/X11R6/lib  -lpthread -Dcimg_use_xshm  -lm
 
 #R�le explicite de construction de l'ex�utable
 $(EXEC):$(OBJETS) Makefile
