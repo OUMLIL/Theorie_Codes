@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <stack>
 #include <array>
+#include <regex>
 
 using namespace std;
 
@@ -28,11 +29,12 @@ class Symbol {
   std::string toString() {
     std::ostringstream oss;
     oss << name << ":" << freq << std::endl;
-    std::string ss{oss.str()};
+    std::string ss(oss.str());
     return ss;
   }
 };
 
+// foncteur priority queue
 class compareSymbol {
   public:
     bool operator()(Symbol * s1, Symbol * s2) {
@@ -40,9 +42,10 @@ class compareSymbol {
     }
 };
 
-
+//Rajout code sur sous-arbre
 void fillCode(Symbol * root, std::string c) {
-    if(root != nullptr) {
+
+    if(root != NULL) {
       stack<Symbol *> stack;
       Symbol * currNode = root;
       stack.push(root);
@@ -55,16 +58,14 @@ void fillCode(Symbol * root, std::string c) {
           currNode->code = c + currNode->code;
         }
 
-        if(currNode->right != nullptr) {
+        if(currNode->right != NULL) {
           stack.push(currNode->right);
         }
-        if(currNode->left != nullptr) {
+        if(currNode->left != NULL) {
           stack.push(currNode->left);
         }
-
       }
     }
-
 }
 
 Symbol* CreateHuffmanCode(vector<Symbol*> &alphabet)
@@ -153,7 +154,7 @@ void DeleteMemory(vector<Symbol*>& alphabet, Symbol* root)
 {
   // To Do: Code Here
   // Clear the memory	
-  if(root != nullptr) {
+  if(root != NULL) {
       stack<Symbol *> stack;
       Symbol * currNode = root;
       
@@ -162,10 +163,10 @@ void DeleteMemory(vector<Symbol*>& alphabet, Symbol* root)
       while(!stack.empty()) {
         currNode = stack.top();
         stack.pop();
-        if(currNode->right != nullptr) {
+        if(currNode->right != NULL) {
           stack.push(currNode->right);
         }
-        if(currNode->left != nullptr) {
+        if(currNode->left != NULL) {
           stack.push(currNode->left);
         }
         delete currNode;
@@ -173,19 +174,68 @@ void DeleteMemory(vector<Symbol*>& alphabet, Symbol* root)
   }  
 }
 
+
+std::string decodeHuffman(std::string huffman_code, Symbol * root) {
+  //huffman decod
+  std::string result{""};
+
+  Symbol * currNode = root;
+  for(char lettre : huffman_code) {
+
+    if(lettre == '0') {
+      currNode = currNode->left;
+    } else {  
+      currNode = currNode->right;
+    }
+
+    if(currNode->leaf) {
+      result += currNode->name;
+      currNode = root;
+    }
+  }
+
+  return result;
+}
+
+std::string writeInHuffman(std::string message, vector<Symbol *> & alphabet) {
+
+  for(size_t i=0;i<alphabet.size();++i) {
+    message = std::regex_replace(message, std::regex(alphabet[i]->name), alphabet[i]->code);
+  }
+  std::string result{message};
+  return result;
+}
+
+double entropie() {
+
+}
+
+double longueurMoyenneHuffman() {
+
+}
+
+
 int main()
 {
  vector<Symbol*> alphabet;
 
  // Compute the frequencies of the symbol
- CreateAlphabet(alphabet, false, "text.txt");
+ CreateAlphabet(alphabet, true, "text.txt");
 
  // Build the Huffman code tree 
  Symbol* root = CreateHuffmanCode(alphabet);
 
  // Display the result
- for(size_t i=0;i<alphabet.size();++i)
+ for(size_t i=0;i<alphabet.size();++i) {
   cout << "Name : " << alphabet[i]->name << " ; Code : " << alphabet[i]->code << " ; freq : " << alphabet[i]->freq << endl;
+ }
+  //huffman decode
+  std::string ss{"hey"};
+  ss = writeInHuffman(ss, alphabet);
+  
+  std::cout << ss << std::endl;
+  std::string result = decodeHuffman("01001100001000010", root);
+  std::cout << result << std::endl;
 
  // Clear the memory
  DeleteMemory(alphabet,root);
