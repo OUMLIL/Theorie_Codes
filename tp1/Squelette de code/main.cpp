@@ -8,6 +8,7 @@
 #include <stack>
 #include <array>
 #include <regex>
+#include <cmath>
 
 using namespace std;
 
@@ -206,12 +207,20 @@ std::string writeInHuffman(std::string message, vector<Symbol *> & alphabet) {
   return result;
 }
 
-double entropie() {
-
+double entropie(vector<Symbol *> & alphabet) {
+  double s=0;
+  for(Symbol * symbol : alphabet){
+    s+= (symbol->freq/100) * std::log2(symbol->freq/100);
+  }
+  return -s;
 }
 
-double longueurMoyenneHuffman() {
-
+double longueurMoyenneHuffman(vector<Symbol *> & alphabet) {
+  double s=0;
+  for(Symbol * symbol : alphabet){
+    s+= (symbol->freq/100) * symbol->code.size();
+  }
+  return s;
 }
 
 
@@ -237,6 +246,7 @@ int main()
   std::string result = decodeHuffman("01001100001000010", root);
   std::cout << result << std::endl;
 
+  std::cout << "entropie =" << entropie(alphabet) << " long moy = " << longueurMoyenneHuffman(alphabet) << std::endl;
  // Clear the memory
  DeleteMemory(alphabet,root);
  return 0;
