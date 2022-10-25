@@ -13,8 +13,15 @@ using namespace cimg_library;
 
 CImg<unsigned char> JPEGEncoder(CImg<unsigned char> image, float quality)
 {
- CImg<unsigned char> comp(image.width(),image.height(),1,1,0);
- comp = image; //to remove replace by JPEG process
+    CImg<unsigned char> comp(image.width(),image.height(),1,1,0);
+
+    int step = 8;
+    cimg_for_insideXY(comp,x ,y, 8) {
+        //DCT
+        std::cout << comp(x,y) << std::endl;
+    }
+
+    comp = image; //to remove replace by JPEG process
 
  // Quantization matrix
 /*
