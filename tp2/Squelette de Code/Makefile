@@ -8,7 +8,7 @@
 EXEC=tp2
 
 #Liste des fichiers sources separes par des espaces
-SOURCES=main.cpp
+SOURCES=main.cpp calcul.cpp
 
 #Liste des fichiers objets
 OBJETS=$(SOURCES:%.cpp=%.o)
