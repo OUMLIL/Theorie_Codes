@@ -161,20 +161,40 @@ float distorsion(CImg<float> & original_image, CImg<float> & encoded_image) {
     
     return (1.0/NM) * somme;
 }
-/*
+
 void drawDistorsion(float qmin, float qmax, float pas, CImg<float> & image) {
 
     std::vector<float> v;
-    CImg<float> visu(500,400,1,3,0);
     CImg<float> comp;
-    CImgDisplay draw_disp(visu, "Distorsion");
 
     for (float q=qmin;q>=qmax;q+=pas){
         comp = JPEGEncoder(image,q);
         v.push_back(distorsion(image,comp));
     }
 
+    const char *const formula = cimg_option("-f", "x", "Formula to    plot");
+    const float x0 = cimg_option("-x0", qmin, "Minimal X-value");
+    const float x1 = cimg_option("-x1", qmax, "Maximal X-value");
+    const int resolution = cimg_option("-r", 5000, "Plot resolution");
+    const unsigned int nresolution = resolution>1 ? resolution : 5000;
+    const unsigned int plot_type = cimg_option("-p", 1, "Plot type");
+    const unsigned int vertex_type = cimg_option("-v", 1, "Vertex type");
+
+    // Create plot data.
+    CImg<double> values(1, nresolution, 1, 1, 0);
+
+    const unsigned int r = nresolution - 1;
+
+    for (int i = 0; i < resolution; ++i)
+    {
+        double xtime = x0 + i*pas;
+        values(0, i) = v.at(i);
+    }
+
+    CImgDisplay disp;
+    CImg<double> values2;
+    values.display_graph(disp, plot_type, vertex_type, "X Axis", x0, x1, "Y Axis");
+    disp.snapshot(values2);
 
 
 }
-*/

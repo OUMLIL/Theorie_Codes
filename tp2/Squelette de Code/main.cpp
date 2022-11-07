@@ -48,7 +48,7 @@ int main()
  // Take the luminance information 
  my_image.channel(0);
  
- float quality;
+ float quality,qmin,qmax,pas;
  CImg<float> comp_image;
  CImg<float> decoded_image;
  int input;
@@ -73,6 +73,7 @@ if (input == 2) {
     std::cin >> quality;
     comp_image = JPEGEncoder(my_image, quality);
     decoded_image = JPEGDecoder(comp_image, quality);
+    std::cout << "Distortion: " << distorsion(my_image, comp_image) << std::endl;
     CImgDisplay main_disp(my_image,"Initial Image");
     CImgDisplay comp_disp(comp_image,"Compressed Image");
     CImgDisplay decoded_disp(decoded_image,"Decoded Image");
@@ -80,6 +81,15 @@ if (input == 2) {
     {
         main_disp.wait();
     }
+ }
+ if (input == 3) {
+    std::cout << "Veuillez fournir un facteur de qualité minimal :" << std::endl;
+    std::cin >> qmin;
+    std::cout << "Veuillez fournir un facteur de qualité maximal :" << std::endl;
+    std::cin >> qmax;
+    std::cout << "Veuillez fournir un pas :" << std::endl;
+    std::cin >> pas;
+    drawDistorsion(qmin,qmax,pas,my_image);
  }
 }
 

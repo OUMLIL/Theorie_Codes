@@ -46,3 +46,4 @@ CImg<float> DCT(CImg<float> & sub_image);
 CImg<float> DCT_inverse(CImg<float> & image_encodee);
 CImg<float> JPEGEncoder(CImg<float> image, float quality);
 CImg<float> JPEGDecoder(CImg<float> image, float quality);
+void drawDistorsion(float qmin, float qmax, float pas, CImg<float> & image);
