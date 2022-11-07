@@ -172,20 +172,20 @@ void drawDistorsion(float qmin, float qmax, float pas, CImg<float> & image) {
         v.push_back(distorsion(image,comp));
     }
 
-    const char *const formula = cimg_option("-f", "x", "Formula to    plot");
-    const float x0 = cimg_option("-x0", qmin, "Minimal X-value");
-    const float x1 = cimg_option("-x1", qmax, "Maximal X-value");
-    const int resolution = cimg_option("-r", 5000, "Plot resolution");
-    const unsigned int nresolution = resolution>1 ? resolution : 5000;
-    const unsigned int plot_type = cimg_option("-p", 1, "Plot type");
-    const unsigned int vertex_type = cimg_option("-v", 1, "Vertex type");
+    //const char *const formula = cimg_option("-f", "x", "Formula to    plot");
+    const float x0 = qmin;
+    const float x1 = qmax;
+    const int resolution = 500;
+    const unsigned int nresolution = 5000;
+    const unsigned int plot_type = 1;
+    const unsigned int vertex_type = 1;
 
     // Create plot data.
     CImg<double> values(1, nresolution, 1, 1, 0);
 
     const unsigned int r = nresolution - 1;
 
-    for (int i = 0; i < resolution; ++i)
+    for (int i = 0; i < v.size(); ++i)
     {
         double xtime = x0 + i*pas;
         values(0, i) = v.at(i);
