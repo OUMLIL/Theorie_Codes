@@ -1,4 +1,5 @@
 #include "calcul.hpp"
+#include <vector>
 
 float C(float i) {
     if(i == 0) {
@@ -160,3 +161,20 @@ float distorsion(CImg<float> & original_image, CImg<float> & encoded_image) {
     
     return (1.0/NM) * somme;
 }
+/*
+void drawDistorsion(float qmin, float qmax, float pas, CImg<float> & image) {
+
+    std::vector<float> v;
+    CImg<float> visu(500,400,1,3,0);
+    CImg<float> comp;
+    CImgDisplay draw_disp(visu, "Distorsion");
+
+    for (float q=qmin;q>=qmax;q+=pas){
+        comp = JPEGEncoder(image,q);
+        v.push_back(distorsion(image,comp));
+    }
+
+
+
+}
+*/
