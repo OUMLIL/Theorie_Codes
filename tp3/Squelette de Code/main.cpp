@@ -13,10 +13,15 @@
 /**
  * Debug macros
  **/ 
-#define DEBUG_RF true // Debug Information: Read File
-#define DEBUG_HE true // Debug Information: Hamming Encoding
+#define DEBUG_RF false // Debug Information: Read File
+#define DEBUG_HE false // Debug Information: Hamming Encoding
 
 using namespace std; 
+
+/**
+ * Matrice génératrice
+*/
+	//todo fill G
 
 /**
  * vector<bitset<N> > readFile(string filename)
@@ -70,8 +75,11 @@ vector<bitset<HAMMING_7> > HammingEncoding(vector<bitset<N> > bitsetVector)
 	if(DEBUG_HE)
 		std::cout << "Encode : \t";
 		
-	for(vector<bitset<N> >::iterator i = bitsetVector.begin(); i != bitsetVector.end();++i)
-	{
+	for(vector<bitset<N> >::iterator i = bitsetVector.begin(); i != bitsetVector.end(); ++i)
+	{	
+		//loop through G step += 4
+		//for each step
+			//fill buffer
 		// Code to modify (sample)		
 		bitset<N> inBuffer = *i;
 		bitset<HAMMING_7> outBuffer;
