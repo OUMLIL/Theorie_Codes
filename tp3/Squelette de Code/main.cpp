@@ -14,7 +14,7 @@
  * Debug macros
  **/ 
 #define DEBUG_RF false // Debug Information: Read File
-#define DEBUG_HE false // Debug Information: Hamming Encoding
+#define DEBUG_HE true // Debug Information: Hamming Encoding
 
 using namespace std; 
 
@@ -71,7 +71,6 @@ vector<bitset<N> > readFile(string filename)
 vector<bitset<HAMMING_7> > HammingEncoding(vector<bitset<N> > bitsetVector)
 {
 	vector<bitset<HAMMING_7> > encodedBitset;
-	
 	if(DEBUG_HE)
 		std::cout << "Encode : \t";
 		
@@ -80,18 +79,16 @@ vector<bitset<HAMMING_7> > HammingEncoding(vector<bitset<N> > bitsetVector)
 		//loop through G step += 4
 		//for each step
 			//fill buffer
-		// Code to modify (sample)		
 		bitset<N> inBuffer = *i;
 		bitset<HAMMING_7> outBuffer;
-
-		outBuffer[0] = inBuffer[0];
-		outBuffer[1] = inBuffer[1];
-		outBuffer[2] = inBuffer[2];
-		outBuffer[3] = inBuffer[3];
-		
-		outBuffer[4] = 0;
-		outBuffer[5] = 0;
-		outBuffer[6] = 0;
+		cout << " | " << inBuffer.to_string();
+		outBuffer[0] = inBuffer[0]^inBuffer[1]^inBuffer[3];
+		outBuffer[1] = inBuffer[0]^inBuffer[2]^inBuffer[3];
+		outBuffer[2] = inBuffer[0];
+		outBuffer[3] = inBuffer[1]^inBuffer[2]^inBuffer[3];
+		outBuffer[4] = inBuffer[1];
+		outBuffer[5] = inBuffer[2];
+		outBuffer[6] = inBuffer[3];
 		
 		if(DEBUG_HE)
 			cout << " | " << outBuffer.to_string();
@@ -105,26 +102,60 @@ vector<bitset<HAMMING_7> > HammingEncoding(vector<bitset<N> > bitsetVector)
 	return encodedBitset;
 }
 
+vector<bitset<N> > HammingDencoding(vector<bitset<HAMMING_7> > bitsetVector)
+{
+	vector<bitset<N> > decodedBitset;
+	vector<bitset<3> > s;
+	if(DEBUG_HE)
+		std::cout << "Encode : \t";
+		
+	for(vector<bitset<HAMMING_7> >::iterator i = bitsetVector.begin(); i != bitsetVector.end(); ++i)
+	{	
+		//loop through G step += 4
+		//for each step
+			//fill buffer
+		bitset<HAMMING_7> inBuffer = *i;
+		bitset<N> outBuffer;
+		bitset<3> tempBuffer;
+		//cout << " | " << inBuffer.to_string();
+		tempBuffer[0] = inBuffer[0]^inBuffer[1]^inBuffer[3]^inBuffer[4];
+		tempBuffer[1] =	inBuffer[0]^inBuffer[2]^inBuffer[3]^inBuffer[5];
+		tempBuffer[2] = inBuffer[1]^inBuffer[2]^inBuffer[3]^inBuffer[6];
+		s.push_back(tempBuffer);
+		cout << " res | " << tempBuffer.to_string();
+		// if(DEBUG_HE)
+		// 	cout << " | " << outBuffer.to_string();
+		
+		decodedBitset.push_back(outBuffer);
+	}
+	
+	if(DEBUG_HE)
+		cout << endl;
+	
+	return decodedBitset;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                     Main                                                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int main()
 {
+std::bitset<N> b1(std::string("0110")); //1010
  vector< bitset<N> > input_data;
  vector< bitset<HAMMING_7> > encode_data; 
 
  // Read data to encode
- input_data = readFile("test.txt");
- 
+ //input_data = readFile("test.txt");
+	input_data.push_back(b1);
  // Encode by Hamming (7,4) coding
  encode_data = HammingEncoding(input_data);
- 
+
  // Inject error
  // TODO
 
  // Decode
- // TODO
+ HammingDencoding(encode_data);
 
 }
 
