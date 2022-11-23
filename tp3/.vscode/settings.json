@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "*.cpp": "cpp",
+        "bitset": "cpp",
+        "string_view": "cpp"
+    }
+}

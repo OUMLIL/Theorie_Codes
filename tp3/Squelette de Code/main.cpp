@@ -82,16 +82,25 @@ vector<bitset<HAMMING_7> > HammingEncoding(vector<bitset<N> > bitsetVector)
 		bitset<N> inBuffer = *i;
 		bitset<HAMMING_7> outBuffer;
 		cout << " | " << inBuffer.to_string();
-		outBuffer[0] = inBuffer[0]^inBuffer[1]^inBuffer[3];
-		outBuffer[1] = inBuffer[0]^inBuffer[2]^inBuffer[3];
-		outBuffer[2] = inBuffer[0];
-		outBuffer[3] = inBuffer[1]^inBuffer[2]^inBuffer[3];
-		outBuffer[4] = inBuffer[1];
-		outBuffer[5] = inBuffer[2];
-		outBuffer[6] = inBuffer[3];
+
+		// outBuffer[0] = inBuffer[0]^inBuffer[1]^inBuffer[3];
+		// outBuffer[1] = inBuffer[0]^inBuffer[2]^inBuffer[3];
+		// outBuffer[2] = inBuffer[0];
+		// outBuffer[3] = inBuffer[1]^inBuffer[2]^inBuffer[3];
+		// outBuffer[4] = inBuffer[1];
+		// outBuffer[5] = inBuffer[2];
+		// outBuffer[6] = inBuffer[3];
+
+		outBuffer[0] = inBuffer[0];
+		outBuffer[1] = inBuffer[1];
+		outBuffer[2] = inBuffer[2];
+		outBuffer[3] = inBuffer[3];
+		outBuffer[4] = inBuffer[0]^inBuffer[1]^inBuffer[3]; 
+		outBuffer[5] = inBuffer[0]^inBuffer[2]^inBuffer[3]; 
+		outBuffer[6] = inBuffer[1]^inBuffer[2]^inBuffer[3];
 		
 		if(DEBUG_HE)
-			cout << " | " << outBuffer.to_string();
+			cout << " | " << outBuffer.to_string() << endl;
 		
 		encodedBitset.push_back(outBuffer);
 	}
@@ -102,30 +111,35 @@ vector<bitset<HAMMING_7> > HammingEncoding(vector<bitset<N> > bitsetVector)
 	return encodedBitset;
 }
 
-vector<bitset<N> > HammingDencoding(vector<bitset<HAMMING_7> > bitsetVector)
+// to find which bit was modified commpare the syndrom with each row of the matrix
+	// the ith row matched means the error is in the ith position
+vector<bitset<N> > HammingDecoding(vector<bitset<HAMMING_7> > bitsetVector)
 {
 	vector<bitset<N> > decodedBitset;
 	vector<bitset<3> > s;
 	if(DEBUG_HE)
-		std::cout << "Encode : \t";
+		std::cout << "Decode : \t";
 		
 	for(vector<bitset<HAMMING_7> >::iterator i = bitsetVector.begin(); i != bitsetVector.end(); ++i)
 	{	
-		//loop through G step += 4
-		//for each step
-			//fill buffer
 		bitset<HAMMING_7> inBuffer = *i;
+		if(DEBUG_HE) {
+			cout << " no error : " << inBuffer.to_string();
+		}
+		inBuffer[3] = 1;
+		if(DEBUG_HE) {
+			cout << " error pos 0 : " << inBuffer.to_string();
+		}
 		bitset<N> outBuffer;
 		bitset<3> tempBuffer;
-		//cout << " | " << inBuffer.to_string();
-		tempBuffer[0] = inBuffer[0]^inBuffer[1]^inBuffer[3]^inBuffer[4];
-		tempBuffer[1] =	inBuffer[0]^inBuffer[2]^inBuffer[3]^inBuffer[5];
-		tempBuffer[2] = inBuffer[1]^inBuffer[2]^inBuffer[3]^inBuffer[6];
-		s.push_back(tempBuffer);
-		cout << " res | " << tempBuffer.to_string();
-		// if(DEBUG_HE)
-		// 	cout << " | " << outBuffer.to_string();
 		
+		tempBuffer[2] = inBuffer[0]^inBuffer[1]^inBuffer[3]^inBuffer[4];
+		tempBuffer[1] =	inBuffer[0]^inBuffer[2]^inBuffer[3]^inBuffer[5];
+		tempBuffer[0] = inBuffer[1]^inBuffer[2]^inBuffer[3]^inBuffer[6];
+		s.push_back(tempBuffer);
+		if(DEBUG_HE) {
+			cout << " res | " << tempBuffer.to_string();
+		}
 		decodedBitset.push_back(outBuffer);
 	}
 	
@@ -141,7 +155,7 @@ vector<bitset<N> > HammingDencoding(vector<bitset<HAMMING_7> > bitsetVector)
 
 int main()
 {
-std::bitset<N> b1(std::string("0110")); //1010
+std::bitset<N> b1(std::string("0001"));
  vector< bitset<N> > input_data;
  vector< bitset<HAMMING_7> > encode_data; 
 
@@ -155,7 +169,7 @@ std::bitset<N> b1(std::string("0110")); //1010
  // TODO
 
  // Decode
- HammingDencoding(encode_data);
+ HammingDecoding(encode_data);
 
 }
 
