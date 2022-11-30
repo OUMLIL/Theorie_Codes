@@ -4,6 +4,7 @@
 #include <map>
 #include <algorithm>
 #include <array>
+#include <cmath>
 
 using namespace std;
  
@@ -61,6 +62,41 @@ public:
         result += calculIC(s);
       }
       return result/v.size();
+  }
+
+  double chi_squared(string sequence) {
+    double result = 0.0;
+    for(char l = 'a'; l <= 'z'; ++l) {
+      double C = std::count(sequence.begin(), sequence.end(), l);
+      double E = targets[l - 'a'] * 26;
+
+      result += pow((C - E), 2) / E;
+    }
+    return result;
+  }
+
+  int candidateLetter(string subsequence) {
+    vector<double> chi_squares;
+    vector<double> epsilon;
+    string decrypted = subsequence;
+
+    for(char l = 'a'; l <= 'z'; ++l) {
+      for(int i = 0 ; i < subsequence.size(); ++i) {
+        decrypted[i] = (decrypted[i] - l + 2*'a') % 26;
+        decrypted[i] = decrypted[i] + 'a';
+      }
+      chi_squares.push_back(chi_squared(decrypted));
+    }
+    
+    for(int i = 0; i < targets.size(); ++i) {
+      epsilon.push_back(std::abs(chi_squares[i] - targets[i]));
+    }
+
+    auto min = std::min(epsilon.begin(), epsilon.end());
+    int index = min - epsilon.begin();
+
+    cout << "result id:" << index << endl;
+    return index;
   }
 };
  
