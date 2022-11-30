@@ -14,7 +14,6 @@ class VigenereCryptanalysis
 private:
   array<double, 26> targets;
   array<double, 26> sortedTargets;
-
   // TO COMPLETE
  
 public:
@@ -29,8 +28,39 @@ public:
   {
     string key = "ISIMA PERHAPS";
     string result = "I CAN NOT DECRYPT THIS TEXT FOR NOW :-)" + input;
- 
+
     return make_pair(result, key);
+  }
+
+  double calculIC(string &ciphered_input) {
+    double s = 0.0;
+    double size = ciphered_input.size()*1.0;
+    for(char i = 'a'; i < 'z'; i++) {
+        auto n = std::count(ciphered_input.begin(), ciphered_input.end(), i);
+        //cout << n << endl;
+        s += (n*(n-1))/(size*(size-1));
+    }
+    return s;
+  }
+
+  vector<string> subsequence(int period, string &&ciphered_input) {
+    vector<string> v;
+    for(int i = 0; i < period; i++) {
+        string s = "";
+        for(int j=i; j<ciphered_input.size(); j+=period){
+          s += ciphered_input[j];
+        }
+        v.push_back(s);
+    }
+    return v;
+  }
+
+  double averageIC(vector<string> &v) {
+      double result;
+      for(auto s : v) {
+        result += calculIC(s);
+      }
+      return result/v.size();
   }
 };
  
@@ -64,4 +94,19 @@ int main()
   cout << "Key: "  << output_fr.second << endl;
   cout << "Text: " << output_fr.first << endl;
 
+
+  //vector<string> v = vc_en.subsequence(15,"vptnvffuntshtarptymjwzirappljmhhqvsubwlzzygvtyitarptyiougxiuydtgzhhvvmumshwkzgstfmekvmpkswdgbilvjljmglmjfqwioiivknulvvfemioiemojtywdsajtwmtcgluysdsumfbieugmvalvxkjduetukatymvkqzhvqvgvptytjwwldyeevquhlulwpkt");
+/*
+  int i = 0;
+  double g = 0.0;
+  for(auto s : v) {
+    cout << i << " :    " << vc_en.calculIC(s) << endl;
+    g += vc_en.calculIC(s);
+    i++;
+  }
+  */
+  for(int i = 1; i<=15;i++) {
+    vector<string> v = vc_en.subsequence(i,"vptnvffuntshtarptymjwzirappljmhhqvsubwlzzygvtyitarptyiougxiuydtgzhhvvmumshwkzgstfmekvmpkswdgbilvjljmglmjfqwioiivknulvvfemioiemojtywdsajtwmtcgluysdsumfbieugmvalvxkjduetukatymvkqzhvqvgvptytjwwldyeevquhlulwpkt");
+    cout << i << " average : " << vc_en.averageIC(v) << endl;
+  }
 }

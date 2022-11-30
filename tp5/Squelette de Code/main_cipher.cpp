@@ -33,7 +33,10 @@ public:
     }
 
     // ADD THE VIGENERE CRYPTION 	
- 
+    for(unsigned int i=0; i < text.length(); ++i) {
+      out[i] = ((out[i] + key[i%key.size()]) - 2*'A')%26;
+      out[i] = out[i] + 'A';
+    }
     return out;
   }
  
@@ -41,10 +44,12 @@ public:
   {
     string out;
 
-    // TO REMOVE
     out = text;
-
     // ADD THE VIGENERE DECRYPTION 
+    for(unsigned int i=0; i < text.length(); ++i) {
+      out[i] = (out[i] - key[i%key.size()] + 2*'A') % 26;
+      out[i] = out[i] + 'A';
+    }
     return out;
   }
 };
