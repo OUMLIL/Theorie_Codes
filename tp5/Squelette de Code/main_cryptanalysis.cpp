@@ -101,14 +101,14 @@ public:
     return index;
   }
 
-  string find_key_letters(string & cipher_text) {
+  string find_key_letters(string & cipher_text, int num_sub_seqs) {
 
     std::map<double, vector<string>> avgIC_subseq_map;
     vector<int> key_candidate{};
     vector<std::string> key_candidates{};
 
     // generating 15 subesquences
-    for(int i = 1; i<=5;i++) {
+    for(int i = 1; i<=num_sub_seqs;i++) {
       vector<string> v = subsequences(i, std::move(cipher_text));
       double avg = averageIC(v);
       avgIC_subseq_map.insert({avg, v});
@@ -153,7 +153,7 @@ public:
     string key = "ISIMA PERHAPS";
     string result = "I CAN NOT DECRYPT THIS TEXT FOR NOW :-)" + input;
     input = to_upper_Case(input);
-    key = find_key_letters(input);
+    key = find_key_letters(input, 5);
     result = decrypt(input, key);
     return make_pair(result, key);
   }
