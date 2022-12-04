@@ -15,7 +15,21 @@ class VigenereCryptanalysis
 private:
   array<double, 26> targets;
   array<double, 26> sortedTargets;
+  
   // TO COMPLETE
+  std::string to_upper_Case(std::string & input) {
+    // Modifying all characters other than uppercase : lowercase -> uppercase, other -> delete
+    std::string out{};
+    for(unsigned int i = 0; i < input.length(); ++i)
+    {
+      if(input[i] >= 'A' && input[i] <= 'Z')
+        out += input[i];
+      else if(input[i] >= 'a' && input[i] <= 'z')
+        out += input[i] + 'A' - 'a';
+    }
+    return out;
+  }
+   
  
 public:
   VigenereCryptanalysis(const array<double, 26>& targetFreqs) 
@@ -24,27 +38,19 @@ public:
     sortedTargets = targets;
     sort(sortedTargets.begin(), sortedTargets.end());
   }
- 
-  pair<string, string> analyze(string input) 
-  {
-    string key = "ISIMA PERHAPS";
-    string result = "I CAN NOT DECRYPT THIS TEXT FOR NOW :-)" + input;
-
-    return make_pair(result, key);
-  }
 
   double calculIC(string &ciphered_input) {
     double s = 0.0;
+    ciphered_input = to_upper_Case(ciphered_input);
     double size = ciphered_input.size()*1.0;
-    for(char i = 'a'; i < 'z'; i++) {
+    for(char i = 'A'; i < 'Z'; i++) {
         auto n = std::count(ciphered_input.begin(), ciphered_input.end(), i);
-        //cout << n << endl;
         s += (n*(n-1))/(size*(size-1));
     }
     return s;
   }
 
-  vector<string> subsequence(int period, string &&ciphered_input) {
+  vector<string> subsequences(int period, string &&ciphered_input) {
     vector<string> v;
     for(int i = 0; i < period; i++) {
         string s = "";
@@ -66,9 +72,10 @@ public:
 
   double chi_squared(string sequence) {
     double result = 0.0;
-    for(char l = 'a'; l <= 'z'; ++l) {
+    sequence = to_upper_Case(sequence);
+    for(char l = 'A'; l <= 'Z'; ++l) {
       double C = std::count(sequence.begin(), sequence.end(), l);
-      double E = targets[l - 'a'] * 26;
+      double E = targets[l - 'A'] * sequence.size();
 
       result += pow((C - E), 2) / E;
     }
@@ -76,34 +83,85 @@ public:
   }
 
   int candidateLetter(string subsequence) {
+
     vector<double> chi_squares;
-    vector<double> epsilon;
+    subsequence = to_upper_Case(subsequence);
     string decrypted = subsequence;
 
-    for(char l = 'a'; l <= 'z'; ++l) {
+    for(char l = 'A'; l <= 'Z'; ++l) {
       for(int i = 0 ; i < subsequence.size(); ++i) {
-        decrypted[i] = (decrypted[i] - l + 2*'a') % 26;
-        decrypted[i] = decrypted[i] + 'a';
+        decrypted[i] = (subsequence[i] - l + 2 * 'A') % 26;
+        decrypted[i] = decrypted[i] + 'A';
       }
       chi_squares.push_back(chi_squared(decrypted));
     }
-    
-    for(int i = 0; i < targets.size(); ++i) {
-      epsilon.push_back(std::abs(chi_squares[i] - targets[i]));
+
+    auto min = std::min_element(chi_squares.begin(), chi_squares.end());
+    int index = min - chi_squares.begin();
+    return index;
+  }
+
+  string find_key_letters(string & cipher_text) {
+
+    std::map<double, vector<string>> avgIC_subseq_map;
+    vector<int> key_candidate{};
+    vector<std::string> key_candidates{};
+
+    // generating 15 subesquences
+    for(int i = 1; i<=5;i++) {
+      vector<string> v = subsequences(i, std::move(cipher_text));
+      double avg = averageIC(v);
+      avgIC_subseq_map.insert({avg, v});
     }
 
-    auto min = std::min(epsilon.begin(), epsilon.end());
-    int index = min - epsilon.begin();
+    // finding the highest avg and its subsequences
+    auto compLambda = [](decltype(avgIC_subseq_map)::value_type & k1, decltype(avgIC_subseq_map)::value_type & k2) -> bool {
+      return k1.first < k2.first;
+    };
+    auto max_avg_subseq = std::max_element(avgIC_subseq_map.begin(), avgIC_subseq_map.end(), compLambda);
 
-    cout << "result id:" << index << endl;
-    return index;
+    //Finding the key
+    for(auto subseq : max_avg_subseq->second) {
+      int index = candidateLetter(subseq);
+      key_candidate.push_back(index);
+    }
+
+    std::string candidate_key{};
+    for(auto const & e : key_candidate) {
+      candidate_key += (e + 'A');
+      char x = e + 'A';
+    }
+    key_candidates.push_back(candidate_key);
+    std::cout << candidate_key << std::endl;
+    return candidate_key;
+  }
+
+  string decrypt(string text,string key)
+  {
+    string out;
+    out = text;
+    // ADD THE VIGENERE DECRYPTION 
+    for(unsigned int i=0; i < text.length(); ++i) {
+      out[i] = (out[i] - key[i%key.size()] + 2*'A') % 26;
+      out[i] = out[i] + 'A';
+    }
+    return out;
+  }
+
+   pair<string, string> analyze(string input) 
+  {
+    string key = "ISIMA PERHAPS";
+    string result = "I CAN NOT DECRYPT THIS TEXT FOR NOW :-)" + input;
+    input = to_upper_Case(input);
+    key = find_key_letters(input);
+    result = decrypt(input, key);
+    return make_pair(result, key);
   }
 };
  
 int main() 
 {
-  string input = "YOU HAVE TO COPY THE CIPHERTEXT FROM THE ATTACHED FILES OR FROM YOUR CIPHER ALGORITHM";
- 
+  string input = "iefomntuohenwfwsjbsfftpgsnmhzsbbizaomosiuxycqaelrwsklqzekjvwsivijmhuvasmvwjewlzgubzlavclhgmuhwhakookakkgmrelgeefvwjelksedtyhsgghbamiyweeljcemxsohlnzujagkshakawwdxzcmvkhuwswlqwtmlshojbsguelgsumlijsmlbsixuhsdbysdaolfatxzofstszwryhwjenuhgukwzmshbagigzzgnzhzsbtzhalelosmlasjdttqzeswwwrklfguzl";
   array<double, 26> english = {
     0.08167, 0.01492, 0.02782, 0.04253, 0.12702, 0.02228,
     0.02015, 0.06094, 0.06966, 0.00153, 0.00772, 0.04025,
@@ -129,20 +187,4 @@ int main()
  
   cout << "Key: "  << output_fr.second << endl;
   cout << "Text: " << output_fr.first << endl;
-
-
-  //vector<string> v = vc_en.subsequence(15,"vptnvffuntshtarptymjwzirappljmhhqvsubwlzzygvtyitarptyiougxiuydtgzhhvvmumshwkzgstfmekvmpkswdgbilvjljmglmjfqwioiivknulvvfemioiemojtywdsajtwmtcgluysdsumfbieugmvalvxkjduetukatymvkqzhvqvgvptytjwwldyeevquhlulwpkt");
-/*
-  int i = 0;
-  double g = 0.0;
-  for(auto s : v) {
-    cout << i << " :    " << vc_en.calculIC(s) << endl;
-    g += vc_en.calculIC(s);
-    i++;
-  }
-  */
-  for(int i = 1; i<=15;i++) {
-    vector<string> v = vc_en.subsequence(i,"vptnvffuntshtarptymjwzirappljmhhqvsubwlzzygvtyitarptyiougxiuydtgzhhvvmumshwkzgstfmekvmpkswdgbilvjljmglmjfqwioiivknulvvfemioiemojtywdsajtwmtcgluysdsumfbieugmvalvxkjduetukatymvkqzhvqvgvptytjwwldyeevquhlulwpkt");
-    cout << i << " average : " << vc_en.averageIC(v) << endl;
-  }
 }
