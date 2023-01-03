@@ -14,6 +14,20 @@
 mpz_t d,e,n;
 mpz_t M,c;
 
+void encrypt(char * message, char * cip) {
+    mpz_t cipher;
+    mpz_init_set_str(M,message,0);
+    char M_str[1000];
+    mpz_get_str(M_str, 10, M);
+    std::cout << "M = " << M_str << std::endl;
+
+    mpz_init(cipher);
+    mpz_powm(cipher, M, e, n);
+    char res[1000];
+    mpz_get_str(res, 10, cipher);
+    std::cout << "RES = " << res << std::endl;
+}
+
 /* Main subroutine */
 int main()
 {
@@ -104,8 +118,10 @@ int main()
     /*
      *  Encrypt
      */
-
-    //TODO
+    char cipher[1000];
+    char hello[6] = "hello";
+    encrypt(hello, cipher);
+    std::cout << "encrypted = " << cipher << std::endl;
     
     /* Clean up the GMP integers */
     mpz_clear(p_minus_1);
