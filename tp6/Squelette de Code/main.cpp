@@ -2,35 +2,64 @@
 //  TP6_RSA
 //  
 
-#include <stdio.h>
-#include <iostream>
-#include <gmp.h>
-
+#include "main.hpp"
 #define BITSTRENGTH  14              /* size of modulus (n) in bits */
 #define PRIMESIZE (BITSTRENGTH / 2)  /* size of the primes p and q  */
 
 /* Declare global variables */
-
 mpz_t d,e,n;
 mpz_t M,c;
-
-void encrypt(char * message, char * cip) {
-    mpz_t cipher;
-    mpz_init_set_str(M,message,0);
-    char M_str[1000];
-    mpz_get_str(M_str, 10, M);
-    std::cout << "M = " << M_str << std::endl;
-
-    mpz_init(cipher);
-    mpz_powm(cipher, M, e, n);
-    char res[1000];
-    mpz_get_str(res, 10, cipher);
-    std::cout << "RES = " << res << std::endl;
-}
 
 /* Main subroutine */
 int main()
 {
+    
+    // Creating keys
+    setup_keys();
+
+    // Encrypt, Decrypt using GMP
+    char plain[5] = "1996";
+    char cipher[1000];
+    encrypt(plain, cipher);
+    decrypt(cipher);
+
+    // Clearing gmp integers
+    clear_gmp_integers();
+}
+
+
+// Encryption of a message (< n) using GMP preconstructed functions
+void encrypt(char * message, char * chiffr_str) {
+    
+    // Setting up and printing message to encrypt
+    mpz_init_set_str(M, message, 0);
+    char M_str[1000];
+    mpz_get_str(M_str, 10, M);
+    std::cout << "M = " << M_str << std::endl << std::endl;
+
+    // Encryption
+    mpz_t chiffr;
+    mpz_init(chiffr);
+    mpz_powm(chiffr, M, e, n);
+    mpz_get_str(chiffr_str, 10, chiffr);
+    std::cout << "M chiffré = " << chiffr_str << std::endl << std::endl;
+}
+
+
+// Decryption of a message
+void decrypt(char * chiffr_str) {
+    mpz_t dechiffr, chiffr;
+    mpz_inits(dechiffr, chiffr, NULL);
+    mpz_init_set_str(chiffr, chiffr_str, 0);
+    mpz_powm(dechiffr, chiffr, d, n);
+
+    char dechiffr_str[1000];
+    mpz_get_str(dechiffr_str, 10, dechiffr);
+    std::cout << "M déchiffré = " << dechiffr_str << std::endl << std::endl;
+}
+
+
+void setup_keys() {
     /* Initialize the GMP integers */
     mpz_init(d);
     mpz_init(e);
@@ -115,26 +144,20 @@ int main()
      */
     std::cout << "Public Keys  (e,n): ( " << e_str <<" , " << n_str << " )" << std::endl;
     std::cout << "Private Keys (d,n): ( " << d_str <<" , " << n_str << " )" << std::endl;
-    /*
-     *  Encrypt
-     */
-    char cipher[1000];
-    char hello[6] = "hello";
-    encrypt(hello, cipher);
-    std::cout << "encrypted = " << cipher << std::endl;
-    
+
     /* Clean up the GMP integers */
     mpz_clear(p_minus_1);
     mpz_clear(q_minus_1);
     mpz_clear(x);
     mpz_clear(p);
     mpz_clear(q);
-    
+}
+
+
+void clear_gmp_integers() {
     mpz_clear(d);
     mpz_clear(e);
     mpz_clear(n);
-    
     mpz_clear(M);
     mpz_clear(c);
 }
-
