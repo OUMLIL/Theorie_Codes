@@ -26,6 +26,14 @@ int main()
     decrypt(cipher);
 
     std::cout << "is prime ?: " << PrimalityTest(10, n) << std::endl;
+    mpz_t a, b, res; 
+    mpz_init(res), mpz_init(a), mpz_init(b);
+    mpz_set_ui(a, 90); mpz_set_ui(b, 100);
+
+
+    GCD(res, a, b);
+
+
 
     // Clearing gmp integers
     clear_gmp_integers();
@@ -114,6 +122,22 @@ bool PrimalityTest(int accuracy, mpz_t & n) {
     return true;
 }  
 
+void GCD(mpz_t result, mpz_t a, mpz_t b) {
+    if(mpz_get_ui(b) == 0) {
+        char a_str[1000];
+        mpz_set(result, a);
+        mpz_get_str(a_str, 10, result);
+        std::cout << "GCD = " << a_str << std::endl;
+    } else {
+        std::cout << "here" << std::endl;
+        mpz_set(a, b);
+
+        mpz_mod(b, a, b);
+        std::cout << mpz_get_ui(b) << std::endl;
+
+        GCD(result, a, b);
+    }
+}
 
 void setup_keys() {
     /* Initialize the GMP integers */
