@@ -28,7 +28,7 @@ int main()
     std::cout << "is prime ?: " << PrimalityTest(10, n) << std::endl;
     mpz_t a, b, res; 
     mpz_init(res), mpz_init(a), mpz_init(b);
-    mpz_set_ui(a, 90); mpz_set_ui(b, 100);
+    mpz_set_ui(a, 100); mpz_set_ui(b, 90);
 
 
     GCD(res, a, b);
@@ -122,19 +122,18 @@ bool PrimalityTest(int accuracy, mpz_t & n) {
     return true;
 }  
 
-void GCD(mpz_t result, mpz_t a, mpz_t b) {
+void GCD(mpz_t & result, mpz_t a, mpz_t b) {
     if(mpz_get_ui(b) == 0) {
         char a_str[1000];
         mpz_set(result, a);
         mpz_get_str(a_str, 10, result);
         std::cout << "GCD = " << a_str << std::endl;
     } else {
-        std::cout << "here" << std::endl;
+        mpz_t tmp_a; mpz_init(tmp_a);
+        mpz_set(tmp_a, a);
         mpz_set(a, b);
-
-        mpz_mod(b, a, b);
-        std::cout << mpz_get_ui(b) << std::endl;
-
+        mpz_mod(b, tmp_a, b);
+        
         GCD(result, a, b);
     }
 }
@@ -167,7 +166,7 @@ void setup_keys() {
      *  Step 1 : Get two large primes.
      */
     mpz_t p, q, p_temp, q_temp;
-    mpz_inits(p, q, p_temp, q_temp);
+    mpz_init(p); mpz_init(q); mpz_init(p_temp); mpz_init(q_temp);
 
     // Making p and q random prime numbers
     mpz_urandomb(p_temp, state, PRIMESIZE); // Render random number between 0 and 2 ^ PRIMESIZE
