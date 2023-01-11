@@ -138,6 +138,32 @@ void GCD(mpz_t & result, mpz_t a, mpz_t b) {
     }
 }
 
+void powm(mpz_t &res, const mpz_t &g, const mpz_t &k, const mpz_t &p){
+    if(mpz_get_ui(k) < 0){
+        mpz_set(g, 1/mpz_get_ui(g));
+        mpz_set(k, -1*mpz_get_ui(k));
+    }
+    if(mpz_get_ui(k) == 0) mpz_set_str(res,"1",0);
+    mpz_t y;
+    mpz_init(y);
+    mpz_set_str(y,"1",0);
+    while(mpz_get_ui(k) > 1) {
+        if(mpz_even_p(k)) {
+            mpz_mul(g,g,g);
+            mpz_mod(g,g,p);
+            mpz_divexact_ui(k,k,2);
+        }
+        else {
+            mpz_mul(y,g,y);
+            mpz_mul(g,g,g);
+            mpz_sub_ui(k,k,1);
+            mpz_divexact_ui(k,k,2);
+        }
+    }
+    mpz_set(g,g,y);
+    mpz_mod(res,g,p);
+}
+
 void setup_keys() {
     /* Initialize the GMP integers */
     mpz_init(d);
