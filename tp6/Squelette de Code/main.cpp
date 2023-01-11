@@ -9,6 +9,8 @@
 /* Declare global variables */
 mpz_t d,e,n;
 mpz_t M,c;
+gmp_randstate_t state;
+
 
 /* Main subroutine */
 int main()
@@ -18,10 +20,12 @@ int main()
     setup_keys();
 
     // Encrypt, Decrypt using GMP
-    char plain[5] = "1996";
+    char plain[7] = "1999";
     char cipher[1000];
     encrypt(plain, cipher);
     decrypt(cipher);
+
+    std::cout << "is prime ?: " << PrimalityTest(10, n) << std::endl;
 
     // Clearing gmp integers
     clear_gmp_integers();
@@ -59,6 +63,58 @@ void decrypt(char * chiffr_str) {
 }
 
 
+bool PrimalityTest(int accuracy, mpz_t & n) {
+    if(mpz_get_si(n) <= 2 || !mpz_odd_p(n)) {
+        return false;
+    }
+
+    
+    // Writing n − 1 as t × 2^s by factoring powers of 2 from n − 1
+    mpz_t t, s;
+    mpz_inits(t, s, NULL);
+
+    mpz_sub_ui(t, n, 1);
+    mpz_set_ui(s, 0);
+
+    while (mpz_even_p(t)) {
+        mpz_fdiv_q_ui(t, t, 2);
+        mpz_add_ui(s, s, 1);
+    }
+    mpz_t a, x, n_1;
+    mpz_init(a);
+    mpz_init(x);
+    mpz_init(n_1);
+
+    for(int i = 0; i < accuracy; ++i) {
+        do {
+            mpz_urandomm(a, state, n);
+        } while(mpz_get_ui(a) < 2);
+
+        mpz_powm(x, a, t, n);
+        mpz_sub_ui(n_1, n, 1);
+
+        if(mpz_get_ui(x) == 1 || mpz_get_ui(x) == mpz_get_ui(n_1)) {
+            continue;
+        }
+
+        for(int r = 1; r < mpz_get_ui(s); ++r) {
+            mpz_mul(x, x, x);
+            mpz_mod(x, x, n);
+
+            if(mpz_get_ui(x) == 1) {
+                return false;
+            }
+
+            if(mpz_get_ui(n_1) == mpz_get_ui(x)) {
+                continue;
+            }
+        }
+        return false;
+    }
+    return true;
+}  
+
+
 void setup_keys() {
     /* Initialize the GMP integers */
     mpz_init(d);
@@ -67,6 +123,10 @@ void setup_keys() {
     
     mpz_init(M);
     mpz_init(c);
+
+    // Initializing the global pseudo random generator
+    gmp_randinit_mt(state);
+    gmp_randseed_ui(state, time(NULL));
     
  
     /* This function creates the keys. The basic algorithm is...
@@ -82,19 +142,25 @@ void setup_keys() {
     /*
      *  Step 1 : Get two large primes.
      */
-    mpz_t p,q;
-    mpz_init(p);
-    mpz_init(q);
-    
-    mpz_init_set_str(p, "47", 0);
-    mpz_init_set_str(q, "71", 0);
+    mpz_t p, q, p_temp, q_temp;
+    mpz_inits(p, q, p_temp, q_temp);
+
+    // Making p and q random prime numbers
+    mpz_urandomb(p_temp, state, PRIMESIZE); // Render random number between 0 and 2 ^ PRIMESIZE
+    mpz_nextprime(p, p_temp); // Selecting first prime number after the random number generated
+    mpz_urandomb(q_temp, state, PRIMESIZE);
+    mpz_nextprime(q, q_temp);
+
+    // Printing results
     char p_str[1000];
     char q_str[1000];
-    mpz_get_str(p_str,10,p);
-    mpz_get_str(q_str,10,q);
+    mpz_get_str(p_str, 10, p); // Converting int to string in base 10
+    mpz_get_str(q_str, 10, q);
     
     std::cout << "Random Prime 'p' = " << p_str <<  std::endl;
     std::cout << "Random Prime 'q' = " << q_str <<  std::endl;
+    std::cout << "is prime ?: " << PrimalityTest(10, p) << std::endl;
+    std::cout << std::endl;
     
     /*
      *  Step 2 : Calculate n (=pq) ie the 1024 bit modulus
@@ -121,20 +187,32 @@ void setup_keys() {
     mpz_mul(x,p_minus_1,q_minus_1);
     char phi_str[1000];
     mpz_get_str(phi_str,10,x);
-    std::cout << "\t phi(n) = " << phi_str << std::endl;
+    std::cout << "\t x = phi(n) = " << phi_str << std::endl;
+
 
     /*
      *  Step 3 : Get small odd integer e such that gcd(e,x) = 1.
      */
-    mpz_init_set_str(e, "79", 0);
+    mpz_t e_temp, pgcd;
+    mpz_init(e_temp);
+    mpz_init(pgcd);
+
+    // Selecting e
+    do {
+        mpz_urandomb(e_temp, state, PRIMESIZE);
+        mpz_init_set_str(e, std::to_string(mpz_get_ui(e_temp) % mpz_get_ui(x)).c_str(), 0);
+        mpz_gcd(pgcd, e, x);
+    } while (mpz_get_ui(pgcd) != 1);
+
+    // Printing results
     char e_str[1000];
-    mpz_get_str(e_str,10,e);
+    mpz_get_str(e_str, 10, e);
     std::cout << "\t e = " << e_str << std::endl;
 
     /*
      *  Step 4 : Calculate unique d such that ed = 1(mod x)
      */
-    mpz_init_set_str(d, "1019", 0);
+    mpz_invert(d, e, x);
     char d_str[1000];
     mpz_get_str(d_str,10,d);
     std::cout << "\t d = " << d_str << std::endl << std::endl;

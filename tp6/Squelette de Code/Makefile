@@ -15,7 +15,7 @@ OBJETS=$(SOURCES:%.cpp=%.o)
 
 #Compilateur et options de compilation
 CCPP=g++
-CFLAGS= -W -Wall -Wextra -pedantic -std=c++0x -I /usr/X11R6/include
+CFLAGS= -W -Wall -Wextra -pedantic -std=c++0x -I /usr/X11R6/include -g
 LFLAGS= -L . -L /usr/X11R6/lib  -lpthread -Dcimg_use_xshm  -lm -lgmp
 
 #R�le explicite de construction de l'ex�utable

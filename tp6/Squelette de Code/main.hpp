@@ -10,3 +10,4 @@ void clear_gmp_integers();
 void setup_keys();
 void decrypt(char * chiffr_str);
 void encrypt(char * message, char * chiffr_str);
+bool PrimalityTest(int accuracy, mpz_t & odd_integer);
