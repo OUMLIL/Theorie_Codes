@@ -17,7 +17,7 @@ int main()
 {
     
     // Creating keys
-    setup_keys();
+    setup_keys_beta();
 
     // Encrypt, Decrypt using GMP
     char plain[7] = "1999";
@@ -63,7 +63,7 @@ void decrypt(char * chiffr_str) {
     mpz_t dechiffr, chiffr;
     mpz_inits(dechiffr, chiffr, NULL);
     mpz_init_set_str(chiffr, chiffr_str, 0);
-    mpz_powm(dechiffr, chiffr, d, n);
+    powm(dechiffr, chiffr, d, n);
 
     char dechiffr_str[1000];
     mpz_get_str(dechiffr_str, 10, dechiffr);
@@ -138,10 +138,17 @@ void GCD(mpz_t & result, mpz_t a, mpz_t b) {
     }
 }
 
-void powm(mpz_t &res, const mpz_t &g, const mpz_t &k, const mpz_t &p){
+void powm(mpz_t &res, mpz_t &g, mpz_t &k, mpz_t &p){
     if(mpz_get_ui(k) < 0){
-        mpz_set(g, 1/mpz_get_ui(g));
-        mpz_set(k, -1*mpz_get_ui(k));
+        mpz_t temp1,temp2;
+        mpz_init(temp1);
+        mpz_set_ui(temp1, 1);
+        mpz_divexact_ui(temp1, temp1,mpz_get_ui(g));
+        mpz_set(g, temp1);
+        mpz_init(temp2);
+        mpz_set_ui(temp2, -1);
+        mpz_mul(temp2, temp2, k);
+        mpz_set(k, temp2);
     }
     if(mpz_get_ui(k) == 0) mpz_set_str(res,"1",0);
     mpz_t y;
@@ -160,7 +167,7 @@ void powm(mpz_t &res, const mpz_t &g, const mpz_t &k, const mpz_t &p){
             mpz_divexact_ui(k,k,2);
         }
     }
-    mpz_set(g,g,y);
+    mpz_mul(g,g,y);
     mpz_mod(res,g,p);
 }
 
@@ -260,6 +267,136 @@ void setup_keys() {
 
     /*
      *  Step 4 : Calculate unique d such that ed = 1(mod x)
+     */
+    mpz_invert(d, e, x);
+    char d_str[1000];
+    mpz_get_str(d_str,10,d);
+    std::cout << "\t d = " << d_str << std::endl << std::endl;
+
+    /*
+     *  Step 5 : Print the public and private key pairs...
+     */
+    std::cout << "Public Keys  (e,n): ( " << e_str <<" , " << n_str << " )" << std::endl;
+    std::cout << "Private Keys (d,n): ( " << d_str <<" , " << n_str << " )" << std::endl;
+
+    /* Clean up the GMP integers */
+    mpz_clear(p_minus_1);
+    mpz_clear(q_minus_1);
+    mpz_clear(x);
+    mpz_clear(p);
+    mpz_clear(q);
+}
+
+void nextprime(mpz_t &p, mpz_t s) {
+    if(mpz_even_p(s)) {
+        mpz_add_ui(s, s, 1);
+    }
+    mpz_set(p, s);
+    while(!PrimalityTest(100, p)) {
+        mpz_add_ui(p, p, 2);
+    }
+}
+
+void setup_keys_beta() {
+    /* Initialize the GMP integers */
+    mpz_init(d);
+    mpz_init(e);
+    mpz_init(n);
+    
+    mpz_init(M);
+    mpz_init(c);
+
+    // Initializing the global pseudo random generator
+    gmp_randinit_mt(state);
+    gmp_randseed_ui(state, time(NULL));
+    
+ 
+    /* This function creates the keys. The basic algorithm is...
+     *
+     *  1. Generate two large distinct primes p and q randomly
+     *  2. Calculate n = pq and x = (p-1)(q-1)
+     *  3. Select a random integer e (1<e<x) such that gcd(e,x) = 1
+     *  4. Calculate the unique d such that ed = 1(mod x)
+     *  5. Public key pair : (e,n), Private key pair : (d,n)
+     *
+     */
+    
+    /*
+     *  Step 1 : Get two large primes.
+     */
+    mpz_t p, q, p_temp, q_temp;
+    mpz_init(p); mpz_init(q); mpz_init(p_temp); mpz_init(q_temp);
+
+    // Making p and q random prime numbers
+    mpz_urandomb(p_temp, state, PRIMESIZE); // Render random number between 0 and 2 ^ PRIMESIZE
+    nextprime(p, p_temp); // Selecting first prime number after the random number generated
+    mpz_urandomb(q_temp, state, PRIMESIZE);
+    nextprime(q, q_temp);
+
+    // Printing results
+    char p_str[1000];
+    char q_str[1000];
+    mpz_get_str(p_str, 10, p); // Converting int to string in base 10
+    mpz_get_str(q_str, 10, q);
+    
+    std::cout << "Random Prime 'p' = " << p_str <<  std::endl;
+    std::cout << "Random Prime 'q' = " << q_str <<  std::endl;
+    std::cout << "is prime ?: " << PrimalityTest(10, p) << std::endl;
+    std::cout << std::endl;
+    
+    /*
+     *  Step 2 : Calculate n (=pq) ie the 1024 bit modulus
+     *  and x (=(p-1)(q-1)).
+     */
+    char n_str[1000];
+    mpz_t x;
+    mpz_init(x);
+
+    /* Calculate n... */
+    mpz_mul(n,p,q);
+    mpz_get_str(n_str,10,n);
+    std::cout << "\t n = " << n_str << std::endl;
+    
+    
+    /* Calculate x... */
+    mpz_t p_minus_1,q_minus_1;
+    mpz_init(p_minus_1);
+    mpz_init(q_minus_1);
+
+    mpz_sub_ui(p_minus_1,p,(unsigned long int)1);
+    mpz_sub_ui(q_minus_1,q,(unsigned long int)1);
+
+    mpz_mul(x,p_minus_1,q_minus_1);
+    char phi_str[1000];
+    mpz_get_str(phi_str,10,x);
+    std::cout << "\t x = phi(n) = " << phi_str << std::endl;
+
+
+    /*
+     *  Step 3 : Get small odd integer e such that gcd(e,x) = 1.
+     */
+    mpz_t e_temp, pgcd;
+    mpz_init(e_temp);
+    mpz_init(pgcd);
+
+    // Selecting e
+    do {
+        mpz_urandomb(e_temp, state, PRIMESIZE);
+        mpz_init_set_str(e, std::to_string(mpz_get_ui(e_temp) % mpz_get_ui(x)).c_str(), 0);
+        mpz_gcd(pgcd, e, x);
+    } while (mpz_get_ui(pgcd) != 1);
+
+    // Printing results
+    char e_str[1000];
+    mpz_get_str(e_str, 10, e);
+    std::cout << "\t e = " << e_str << std::endl;
+
+    /*
+     *  Step 4 : Calculate unique d such that ed = 1(mod x)
+     ed = 1 + K*x
+     ed +(- k)*x = 1
+     d = (1 + K*x)/e
+     extended_euclide(e, x) => e , -k
      */
     mpz_invert(d, e, x);
     char d_str[1000];
