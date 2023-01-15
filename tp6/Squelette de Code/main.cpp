@@ -417,7 +417,7 @@ void setup_keys_beta() {
     mpz_clear(q);
 }
 
-void extended_GCD(mpz_t a, mpz_t b, mpz_t & k1, mpz_t & k2) {
+void extended_GCD(const mpz_t a, const mpz_t b, mpz_t & k1, mpz_t & k2) {
 
     mpz_t x1_tmp; mpz_init(x1_tmp); mpz_set_ui(x1_tmp, 1);
     mpz_t x2_tmp; mpz_init(x2_tmp); mpz_set_ui(x2_tmp, 0);
@@ -425,13 +425,16 @@ void extended_GCD(mpz_t a, mpz_t b, mpz_t & k1, mpz_t & k2) {
     mpz_t y1_tmp; mpz_init(y1_tmp); mpz_set_ui(y1_tmp, 0);
     mpz_t y2_tmp; mpz_init(y2_tmp); mpz_set_ui(y2_tmp, 1);
 
-    while(mpz_get_ui(b) != 0) {
+    mpz_t a_tmp; mpz_init(a_tmp); mpz_set(a_tmp, a);
+    mpz_t b_tmp; mpz_init(b_tmp); mpz_set(b_tmp, b);
+
+    while(mpz_get_ui(b_tmp) != 0) {
 
         mpz_t q; mpz_init(q);
-        mpz_div(q, a, b);
+        mpz_div(q, a_tmp, b_tmp);
 
         mpz_t r; mpz_init(r);
-        mpz_mod(r, a, b);
+        mpz_mod(r, a_tmp, b_tmp);
 
         mpz_t tmp; mpz_init(tmp);
         mpz_t tmp2; mpz_init(tmp2);
@@ -442,8 +445,8 @@ void extended_GCD(mpz_t a, mpz_t b, mpz_t & k1, mpz_t & k2) {
         mpz_sub(k1, x2_tmp, tmp);
         mpz_sub(k2, y2_tmp, tmp2);
 
-        mpz_set(a, b);
-        mpz_set(b, r);
+        mpz_set(a_tmp, b_tmp);
+        mpz_set(b_tmp, r);
 
         mpz_set(x2_tmp, x1_tmp);
         mpz_set(x1_tmp, k1);
@@ -456,17 +459,21 @@ void extended_GCD(mpz_t a, mpz_t b, mpz_t & k1, mpz_t & k2) {
     mpz_set(k2, y2_tmp);
 }
 
-void invert(mpz_t & d, mpz_t x, mpz_t e) {
+void invert(mpz_t & d, const mpz_t e, const mpz_t x) {
     mpz_t k1; mpz_init(k1);
     mpz_t k2; mpz_init(k2);
 
-    extended_GCD(x, e, k1, k2);
+    extended_GCD(e, x, k1, k2);
 
     mpz_t tmp; mpz_init(tmp);
 
     char k2_s[1000];
     mpz_get_str(k2_s,10,k2);
-    std::cout << "\t k2 = " << k2_s << std::endl << std::endl;
+    char k1_s[1000];
+    mpz_get_str(k1_s,10,k1);
+    char x_s[1000];
+    mpz_get_str(x_s,10,x);
+    std::cout << "\t k1 , k2, x = " << k1_s << ", " << k2_s << ", " << x_s << std::endl << std::endl;
 
     
     mpz_mod(tmp, k2, x);
