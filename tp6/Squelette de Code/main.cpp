@@ -11,7 +11,6 @@ mpz_t d,e,n;
 mpz_t M,c;
 gmp_randstate_t state;
 
-
 /* Main subroutine */
 int main()
 {   
