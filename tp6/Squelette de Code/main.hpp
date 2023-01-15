@@ -15,3 +15,5 @@ void encrypt(char * message, char * chiffr_str);
 bool PrimalityTest(int accuracy, mpz_t & odd_integer);
 void GCD(mpz_t & result, mpz_t a, mpz_t b);
 void powm(mpz_t &res, mpz_t &g, mpz_t &k, mpz_t &p);
+void invert(mpz_t & d, mpz_t x, mpz_t e);
+void extended_GCD(mpz_t e, mpz_t x, mpz_t & k1, mpz_t & k2);
