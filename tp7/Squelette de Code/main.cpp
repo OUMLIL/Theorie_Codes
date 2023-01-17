@@ -5,9 +5,33 @@
 #include <stdio.h>
 #include <iostream>
 #include <gmp.h>
+#include "main.hpp"
 
 #define BITSTRENGTH  14              /* size of prime number (p) in bits */
 #define DEBUG true
+
+gmp_randstate_t state;
+
+void generatePrime(mpz_t &p) {
+    mpz_init(p);
+    //gmp_randstate_t state; gmp_randinit_mt(state); gmp_randseed_ui(state, time(NULL));
+    mpz_t p_tmp; mpz_init(p_tmp);
+    mpz_urandomb(p_tmp, state, BITSTRENGTH);
+    mpz_nextprime(p, p_tmp);
+}
+
+void generateSecret(mpz_t &s, mpz_t p) {
+    mpz_init(s);
+    //gmp_randstate_t state; gmp_randinit_mt(state); gmp_randseed_ui(state, time(NULL));
+    mpz_t s_tmp; mpz_init(s_tmp);
+    bool cond = true;
+    while(cond ) {
+        mpz_urandomb(s_tmp, state, BITSTRENGTH);
+        if(mpz_get_ui(s_tmp) < mpz_get_ui(p)) cond =false;
+        
+    }
+    mpz_set(s, s_tmp);
+}
 
 /* Main subroutine */
 int main()
@@ -25,6 +49,7 @@ int main()
 
     mpz_t x1,x2,x3,x4;  // Login users
     mpz_t y1,y2,y3,y4;  // Shares of users
+    gmp_randinit_mt(state); gmp_randseed_ui(state, time(NULL));
 
     /* This function creates the shares computation. The basic algorithm is...
     *
@@ -40,9 +65,10 @@ int main()
      *  Step 1: Initialize Prime Number : we work into Z/pZ
      */
 
-    mpz_init(p); mpz_init_set_str(p, "11", 0);
+    //mpz_init(p); mpz_init_set_str(p, "11", 0);
     
     //TODO: Delete this part and compute a prime number randomly
+    generatePrime(p);
     
     if (DEBUG)
     {
@@ -54,9 +80,10 @@ int main()
      *  Step 2: Initialize Secret Number
      */
 
-    mpz_init(S); mpz_init_set_str(S, "5", 0);
+    //mpz_init(S); mpz_init_set_str(S, "5", 0);
     
     //TODO: Delete this part and compute the secret randomly ( warning: inside Z/pZ )
+    generateSecret(S, p);
     
     if (DEBUG)
     {
