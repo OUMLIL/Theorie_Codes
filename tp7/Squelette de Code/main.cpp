@@ -14,23 +14,52 @@ gmp_randstate_t state;
 
 void generatePrime(mpz_t &p) {
     mpz_init(p);
-    //gmp_randstate_t state; gmp_randinit_mt(state); gmp_randseed_ui(state, time(NULL));
     mpz_t p_tmp; mpz_init(p_tmp);
     mpz_urandomb(p_tmp, state, BITSTRENGTH);
     mpz_nextprime(p, p_tmp);
 }
 
-void generateSecret(mpz_t &s, mpz_t p) {
+void generateRandom(mpz_t &s, mpz_t p) {
     mpz_init(s);
-    //gmp_randstate_t state; gmp_randinit_mt(state); gmp_randseed_ui(state, time(NULL));
     mpz_t s_tmp; mpz_init(s_tmp);
-    bool cond = true;
-    while(cond ) {
-        mpz_urandomb(s_tmp, state, BITSTRENGTH);
-        if(mpz_get_ui(s_tmp) < mpz_get_ui(p)) cond =false;
-        
+    mpz_urandomb(s_tmp, state, BITSTRENGTH);
+    mpz_mod(s, s_tmp, p);
+}
+
+void generateCoefs(mpz_t *tab, mpz_t p, int k) {
+    mpz_t tmp;
+    mpz_init(tmp);
+    for(int i = 0; i < k; ++i){
+        generateRandom(tmp, p);
+        mpz_set(tab[i], tmp);
     }
-    mpz_set(s, s_tmp);
+    /*
+    bool cond = true;
+    while(cond) {
+        generateRandom(a1, p);
+        generateRandom(a2, p);
+        if(mpz_get_ui(a1) != mpz_get_ui(a2)) {
+            cond = false;
+        }
+    }
+    */
+}
+/*
+void calculateImage()
+
+void computeShares(mpz_t &x[], mpz_t &y[], , mpz_t s, int n) {
+    for(int i = 0; i < n; ++i) {
+        mpz_set_ui(x[i], i);
+        unsigned image = mpz_get_ui(s) + mpz_get_ui(a1)*i + mpz_get_ui(a2)*i*i;
+        mpz_set_ui(y[i], image);
+    }
+}
+*/
+
+void init_tab(mpz_t * tab, int t) {
+    for(int i = 0; i < t; ++i) {
+        mpz_init(tab[i]);
+    }
 }
 
 /* Main subroutine */
@@ -49,6 +78,7 @@ int main()
 
     mpz_t x1,x2,x3,x4;  // Login users
     mpz_t y1,y2,y3,y4;  // Shares of users
+    //initialize seed
     gmp_randinit_mt(state); gmp_randseed_ui(state, time(NULL));
 
     /* This function creates the shares computation. The basic algorithm is...
@@ -83,7 +113,7 @@ int main()
     //mpz_init(S); mpz_init_set_str(S, "5", 0);
     
     //TODO: Delete this part and compute the secret randomly ( warning: inside Z/pZ )
-    generateSecret(S, p);
+    generateRandom(S, p);
     
     if (DEBUG)
     {
@@ -94,15 +124,16 @@ int main()
     /*
      *  Step 3: Initialize Coefficient of polynom
      */
-    mpz_init(a1); mpz_init_set_str(a1, "3", 0);
-    mpz_init(a2); mpz_init_set_str(a2, "10", 0);
-    
-    //TODO: Delete this part and compute the coeffiecients randomly ( warning: inside Z/pZ )
+    //mpz_init(a1); generateRandom(a1, p);//mpz_init_set_str(a1, "3", 0);
+    //mpz_init(a2); generateRandom(a2, p);//mpz_init_set_str(a2, "10", 0);
+    //TODO: Delete this part and compute the coeffiecients randomly ( warning: inside Z/pZ )//done
+    mpz_t  a[2]; 
+    generateCoefs(a, p, k);
     
     if (DEBUG)
     {
-        char a1_str[1000]; mpz_get_str(a1_str,10,a1);
-        char a2_str[1000]; mpz_get_str(a2_str,10,a2);
+        char a1_str[1000]; mpz_get_str(a1_str,10,a[1]);
+        char a2_str[1000]; mpz_get_str(a2_str,10,a[2]);
         char S_str[1000];  mpz_get_str(S_str,10,S);
         std::cout << "Polynom 'P(X)' = " << a2_str << "X^2 + " << a1_str << "X + " << S_str << std::endl;
     }
@@ -110,6 +141,7 @@ int main()
     /*
      *  Step 4: Shares computation for each users (xi, yi)
      */
+    
     mpz_init(x1); mpz_init_set_str(x1, "2", 0);
     mpz_init(x2); mpz_init_set_str(x2, "4", 0);
     mpz_init(x3); mpz_init_set_str(x3, "6", 0);
@@ -121,6 +153,8 @@ int main()
     mpz_init(y4); mpz_init_set_str(y4, "9", 0);
     
     //TODO: Delete this part and compute the shares of all users with public login
+
+
     
     if (DEBUG)
     {
