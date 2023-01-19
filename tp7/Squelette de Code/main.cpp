@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <gmp.h>
+#include <cmath>
 #include "main.hpp"
 
 #define BITSTRENGTH  14              /* size of prime number (p) in bits */
@@ -42,10 +43,11 @@ bool check_coefs_different(mpz_t *tab, int taille, mpz_t e) {
 }
 */
 
-unsigned compute_image(mpz_t *a, int i, int k, mpz_t s) {
+unsigned compute_image(mpz_t *a, mpz_t x, int k, mpz_t s) {
     unsigned image = mpz_get_ui(s);
-    for(int j=0; j < k-1; ++j) {
-        image += mpz_get_ui(a[j])*(i^(j+1));
+    for(int j=0; j < k; j++) {
+        image += mpz_get_ui(a[j])*pow(mpz_get_ui(x),j+1);
+        //std::cout << "a" << j << ": " << mpz_get_ui(a[j]) << " x^" << j << "= " << pow(mpz_get_ui(x),j) << std::endl;
     }
     return image;
 }
@@ -54,8 +56,8 @@ void computeShares(mpz_t *x, mpz_t *y, mpz_t *a, mpz_t s, int k, int n) {
     init_tab_mpz(x, n);
     init_tab_mpz(y, n);
     for(int i = 0; i < n; ++i) {
-        mpz_set_ui(x[i], i);
-        unsigned image = compute_image(a, i, k, s);
+        mpz_set_ui(x[i], i+1);
+        unsigned image = compute_image(a, x[i], k, s);
         mpz_set_ui(y[i], image);
     }
 }
@@ -132,12 +134,12 @@ int main()
     //mpz_init(a1); generateRandom(a1, p);//mpz_init_set_str(a1, "3", 0);
     //mpz_init(a2); generateRandom(a2, p);//mpz_init_set_str(a2, "10", 0);
     //TODO: Delete this part and compute the coeffiecients randomly ( warning: inside Z/pZ )//done 
-    generateCoefs(a, p, k);
+    generateCoefs(a, p, k-1);
     
     if (DEBUG)
     {
-        char a1_str[1000]; mpz_get_str(a1_str,10,a[1]);
-        char a2_str[1000]; mpz_get_str(a2_str,10,a[2]);
+        char a1_str[1000]; mpz_get_str(a1_str,10,a[0]);
+        char a2_str[1000]; mpz_get_str(a2_str,10,a[1]);
         char S_str[1000];  mpz_get_str(S_str,10,S);
         std::cout << "Polynom 'P(X)' = " << a2_str << "X^2 + " << a1_str << "X + " << S_str << std::endl;
     }
@@ -157,7 +159,7 @@ int main()
     mpz_init(y4); mpz_init_set_str(y4, "9", 0);
     */
     //TODO: Delete this part and compute the shares of all users with public login
-    computeShares(x, y, a, S, k, n);
+    computeShares(x, y, a, S, k-1, n);
 
     
     if (DEBUG)
