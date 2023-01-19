@@ -29,20 +29,11 @@ void generateRandom(mpz_t &s, mpz_t p) {
 void generateCoefs(mpz_t *tab, mpz_t p, int k) {
     mpz_t tmp;
     mpz_init(tmp);
+    init_tab_mpz(tab, k-1);
     for(int i = 0; i < k; ++i){
         generateRandom(tmp, p);
         mpz_set(tab[i], tmp);
     }
-    /*
-    bool cond = true;
-    while(cond) {
-        generateRandom(a1, p);
-        generateRandom(a2, p);
-        if(mpz_get_ui(a1) != mpz_get_ui(a2)) {
-            cond = false;
-        }
-    }
-    */
 }
 /*
 void calculateImage()
@@ -56,7 +47,7 @@ void computeShares(mpz_t &x[], mpz_t &y[], , mpz_t s, int n) {
 }
 */
 
-void init_tab(mpz_t * tab, int t) {
+void init_tab_mpz(mpz_t * tab, int t) {
     for(int i = 0; i < t; ++i) {
         mpz_init(tab[i]);
     }
@@ -73,7 +64,7 @@ int main()
     mpz_t S;            // Secret
     mpz_t Sr;           // Reconstruction of the Secret
 
-    mpz_t a1, a2;       // Coefficients of polynom
+    mpz_t  a[2];       // Coefficients of polynom
     mpz_t alpha1,alpha2,alpha3;  // Lagrangian polynomials in zero
 
     mpz_t x1,x2,x3,x4;  // Login users
@@ -126,8 +117,7 @@ int main()
      */
     //mpz_init(a1); generateRandom(a1, p);//mpz_init_set_str(a1, "3", 0);
     //mpz_init(a2); generateRandom(a2, p);//mpz_init_set_str(a2, "10", 0);
-    //TODO: Delete this part and compute the coeffiecients randomly ( warning: inside Z/pZ )//done
-    mpz_t  a[2]; 
+    //TODO: Delete this part and compute the coeffiecients randomly ( warning: inside Z/pZ )//done 
     generateCoefs(a, p, k);
     
     if (DEBUG)
@@ -202,7 +192,7 @@ int main()
     mpz_clear(y1);mpz_clear(y2);mpz_clear(y3);mpz_clear(y4);
     mpz_clear(x1);mpz_clear(x2);mpz_clear(x3);mpz_clear(x4);
     mpz_clear(alpha1);mpz_clear(alpha2);mpz_clear(alpha3);
-    mpz_clear(a1);mpz_clear(a2);
+    //mpz_clear(a1);mpz_clear(a2);
     mpz_clear(temp);
     mpz_clear(Sr);
     mpz_clear(S);
