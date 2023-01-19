@@ -27,25 +27,39 @@ void generateRandom(mpz_t &s, mpz_t p) {
 }
 
 void generateCoefs(mpz_t *tab, mpz_t p, int k) {
-    mpz_t tmp;
-    mpz_init(tmp);
-    init_tab_mpz(tab, k-1);
-    for(int i = 0; i < k; ++i){
-        generateRandom(tmp, p);
-        mpz_set(tab[i], tmp);
+    init_tab_mpz(tab, k);
+    for(int i = 0; i < k; i++){
+        generateRandom(tab[i], p);
     }
 }
 /*
-void calculateImage()
+bool check_coefs_different(mpz_t *tab, int taille, mpz_t e) {
+    bool res = false;
+    for(int i=0; i < taille; ++i) {
+        if(mpz_cmp(tab[i], e) == 0) res = true;
+    }
+    return res;
+}
+*/
 
-void computeShares(mpz_t &x[], mpz_t &y[], , mpz_t s, int n) {
+unsigned compute_image(mpz_t *a, int i, int k, mpz_t s) {
+    unsigned image = mpz_get_ui(s);
+    for(int j=0; j < k-1; ++j) {
+        image += mpz_get_ui(a[j])*(i^(j+1));
+    }
+    return image;
+}
+
+void computeShares(mpz_t *x, mpz_t *y, mpz_t *a, mpz_t s, int k, int n) {
+    init_tab_mpz(x, n);
+    init_tab_mpz(y, n);
     for(int i = 0; i < n; ++i) {
         mpz_set_ui(x[i], i);
-        unsigned image = mpz_get_ui(s) + mpz_get_ui(a1)*i + mpz_get_ui(a2)*i*i;
+        unsigned image = compute_image(a, i, k, s);
         mpz_set_ui(y[i], image);
     }
 }
-*/
+
 
 void init_tab_mpz(mpz_t * tab, int t) {
     for(int i = 0; i < t; ++i) {
@@ -64,11 +78,11 @@ int main()
     mpz_t S;            // Secret
     mpz_t Sr;           // Reconstruction of the Secret
 
-    mpz_t  a[2];       // Coefficients of polynom
-    mpz_t alpha1,alpha2,alpha3;  // Lagrangian polynomials in zero
+    mpz_t  a[k-1];       // Coefficients of polynom
+    mpz_t alpha1, alpha2, alpha3;  // Lagrangian polynomials in zero
 
-    mpz_t x1,x2,x3,x4;  // Login users
-    mpz_t y1,y2,y3,y4;  // Shares of users
+    mpz_t x[n];  // Login users
+    mpz_t y[n];  // Shares of users
     //initialize seed
     gmp_randinit_mt(state); gmp_randseed_ui(state, time(NULL));
 
@@ -131,7 +145,7 @@ int main()
     /*
      *  Step 4: Shares computation for each users (xi, yi)
      */
-    
+    /*
     mpz_init(x1); mpz_init_set_str(x1, "2", 0);
     mpz_init(x2); mpz_init_set_str(x2, "4", 0);
     mpz_init(x3); mpz_init_set_str(x3, "6", 0);
@@ -141,22 +155,22 @@ int main()
     mpz_init(y2); mpz_init_set_str(y2, "1", 0);
     mpz_init(y3); mpz_init_set_str(y3, "9", 0);
     mpz_init(y4); mpz_init_set_str(y4, "9", 0);
-    
+    */
     //TODO: Delete this part and compute the shares of all users with public login
-
+    computeShares(x, y, a, S, k, n);
 
     
     if (DEBUG)
     {
-        char x1_str[1000]; mpz_get_str(x1_str,10,x1);
-        char x2_str[1000]; mpz_get_str(x2_str,10,x2);
-        char x3_str[1000]; mpz_get_str(x3_str,10,x3);
-        char x4_str[1000]; mpz_get_str(x4_str,10,x4);
+        char x1_str[1000]; mpz_get_str(x1_str,10,x[0]);
+        char x2_str[1000]; mpz_get_str(x2_str,10,x[1]);
+        char x3_str[1000]; mpz_get_str(x3_str,10,x[2]);
+        char x4_str[1000]; mpz_get_str(x4_str,10,x[3]);
 
-        char y1_str[1000]; mpz_get_str(y1_str,10,y1);
-        char y2_str[1000]; mpz_get_str(y2_str,10,y2);
-        char y3_str[1000]; mpz_get_str(y3_str,10,y3);
-        char y4_str[1000]; mpz_get_str(y4_str,10,y4);
+        char y1_str[1000]; mpz_get_str(y1_str,10,y[0]);
+        char y2_str[1000]; mpz_get_str(y2_str,10,y[1]);
+        char y3_str[1000]; mpz_get_str(y3_str,10,y[2]);
+        char y4_str[1000]; mpz_get_str(y4_str,10,y[3]);
         
         std::cout << "Login and share of each users : " << "( x1="<< x1_str << " ; y1=" << y1_str << " ) , "  << "( x2="<< x2_str << " ; y2=" << y2_str << " ) , "  << "( x3="<< x3_str << " ; y3=" << y3_str << " ) , "  << "( x4="<< x4_str << " , y4=" << y4_str << " )" << std::endl;
     }
@@ -174,11 +188,11 @@ int main()
     mpz_init(Sr); mpz_init_set_str(Sr, "0", 0);
     mpz_t temp; mpz_init(temp);
     
-    mpz_mul(temp,alpha1,y1);
+    mpz_mul(temp,alpha1,y[0]);
     mpz_add(Sr, Sr, temp);
-    mpz_mul(temp,alpha2,y2);
+    mpz_mul(temp,alpha2,y[1]);
     mpz_add(Sr, Sr, temp);
-    mpz_mul(temp,alpha3,y3);
+    mpz_mul(temp,alpha3,y[2]);
     mpz_add(Sr, Sr, temp);
     mpz_mod(Sr, Sr, p );
     
@@ -189,8 +203,8 @@ int main()
     }
     
     /* Clean up the GMP integers */
-    mpz_clear(y1);mpz_clear(y2);mpz_clear(y3);mpz_clear(y4);
-    mpz_clear(x1);mpz_clear(x2);mpz_clear(x3);mpz_clear(x4);
+    //mpz_clear(y1);mpz_clear(y2);mpz_clear(y3);mpz_clear(y4);
+    //mpz_clear(x1);mpz_clear(x2);mpz_clear(x3);mpz_clear(x4);
     mpz_clear(alpha1);mpz_clear(alpha2);mpz_clear(alpha3);
     //mpz_clear(a1);mpz_clear(a2);
     mpz_clear(temp);
