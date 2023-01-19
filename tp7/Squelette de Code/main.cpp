@@ -94,8 +94,18 @@ void computeLagrange(mpz_t *alpha, mpz_t * x, int k, int n) {
         }
         mpz_set(alpha[i], prod);
         char p_str[1000]; mpz_get_str(p_str,10,alpha[i]);
-        std::cout << "alpha" << i << "= " << p_str << std::endl;
+        std::cout << "alpha" << i << " = " << p_str << std::endl;
     }
+}
+
+void reconstructSecret(mpz_t * alpha, mpz_t *y, mpz_t Sr, mpz_t p, int k) {
+    mpz_init(Sr); mpz_init_set_str(Sr, "0", 0);
+    mpz_t temp; mpz_init(temp);
+    for(int i = 0; i < k; i++) {
+        mpz_mul(temp,alpha[i],y[i]);
+        mpz_add(Sr, Sr, temp);
+    }
+    mpz_mod(Sr, Sr, p );
 }
 
 /* Main subroutine */
@@ -217,6 +227,7 @@ int main()
     //TODO: Delete this part and automatically compute the secret with k or more shares
     computeLagrange(alpha, x, k, n);
     // Compute Secret = sum_{i=1}^{k} alpha_i x y_i
+    /*
     mpz_init(Sr); mpz_init_set_str(Sr, "0", 0);
     mpz_t temp; mpz_init(temp);
     
@@ -227,13 +238,14 @@ int main()
     mpz_mul(temp,alpha[2],y[2]);
     mpz_add(Sr, Sr, temp);
     mpz_mod(Sr, Sr, p );
-    
+    */
+   
+   reconstructSecret(alpha, y, Sr, p, k);
     if (DEBUG)
     {
         char Sr_str[1000]; mpz_get_str(Sr_str,10,Sr);
         std::cout << "Reconstruction of the secret : S = " << Sr_str << std::endl;
     }
-    
     /* Clean up the GMP integers */
     //mpz_clear(y1);mpz_clear(y2);mpz_clear(y3);mpz_clear(y4);
     //mpz_clear(x1);mpz_clear(x2);mpz_clear(x3);mpz_clear(x4);
@@ -243,7 +255,7 @@ int main()
     clear_tab_mpz(y, n);
     clear_tab_mpz(alpha, k);
     clear_tab_mpz(a, k-1);
-    mpz_clear(temp);
+    //mpz_clear(temp);
     mpz_clear(Sr);
     mpz_clear(S);
     mpz_clear(p);
