@@ -43,22 +43,26 @@ bool check_coefs_different(mpz_t *tab, int taille, mpz_t e) {
 }
 */
 
-unsigned compute_image(mpz_t *a, mpz_t x, int k, mpz_t s) {
-    unsigned image = mpz_get_ui(s);
+void compute_image(mpz_t &image, mpz_t *a, mpz_t x, int k, mpz_t s) {
+    mpz_set(image, s);
+    mpz_t tmp; mpz_init(tmp);
     for(int j=0; j < k; j++) {
-        image += mpz_get_ui(a[j])*pow(mpz_get_ui(x),j+1);
+        //image += mpz_get_ui(a[j])*pow(mpz_get_ui(x),j+1);
         //std::cout << "a" << j << ": " << mpz_get_ui(a[j]) << " x^" << j << "= " << pow(mpz_get_ui(x),j) << std::endl;
+        mpz_pow_ui(tmp, x, j+1);
+        mpz_mul(tmp, a[j], tmp);
+        mpz_add(image, image, tmp);
     }
-    return image;
 }
 
 void computeShares(mpz_t *x, mpz_t *y, mpz_t *a, mpz_t s, int k, int n) {
     init_tab_mpz(x, n);
     init_tab_mpz(y, n);
     for(int i = 0; i < n; ++i) {
+        mpz_t image; mpz_init(image);
         mpz_set_ui(x[i], i+1);
-        unsigned image = compute_image(a, x[i], k, s);
-        mpz_set_ui(y[i], image);
+        compute_image(image, a, x[i], k, s);
+        mpz_set(y[i], image);
     }
 }
 
@@ -66,6 +70,31 @@ void computeShares(mpz_t *x, mpz_t *y, mpz_t *a, mpz_t s, int k, int n) {
 void init_tab_mpz(mpz_t * tab, int t) {
     for(int i = 0; i < t; ++i) {
         mpz_init(tab[i]);
+    }
+}
+
+void clear_tab_mpz(mpz_t * tab, int t) {
+    for(int i = 0; i < t; ++i) {
+        mpz_clear(tab[i]);
+    }
+}
+
+void computeLagrange(mpz_t *alpha, mpz_t * x, int k, int n) {
+    init_tab_mpz(alpha, k);
+    mpz_t prod; mpz_init(prod);
+    mpz_t tmp; mpz_init(tmp);
+    for(int i = 0; i < k; i++) {
+        mpz_set_str(prod, "1", 0);
+        for(int j = 0; j < n; j++) {
+            if(i != j) {
+                mpz_sub(tmp, x[j], x[i]);
+                mpz_div(tmp, x[j], tmp);
+                mpz_mul(prod, prod, tmp);
+            }
+        }
+        mpz_set(alpha[i], prod);
+        char p_str[1000]; mpz_get_str(p_str,10,alpha[i]);
+        std::cout << "alpha" << i << "= " << p_str << std::endl;
     }
 }
 
@@ -81,7 +110,7 @@ int main()
     mpz_t Sr;           // Reconstruction of the Secret
 
     mpz_t  a[k-1];       // Coefficients of polynom
-    mpz_t alpha1, alpha2, alpha3;  // Lagrangian polynomials in zero
+    mpz_t alpha[k];  // Lagrangian polynomials in zero
 
     mpz_t x[n];  // Login users
     mpz_t y[n];  // Shares of users
@@ -180,21 +209,22 @@ int main()
     /*
      *  Step 5: Sample for reconstruct the secret with 3 users (x1, x2, x3)
      */
+    /*
     mpz_init(alpha1); mpz_init_set_str(alpha1, "3", 0);
     mpz_init(alpha2); mpz_init_set_str(alpha2, "8", 0);
     mpz_init(alpha3); mpz_init_set_str(alpha3, "1", 0);
-
+    */
     //TODO: Delete this part and automatically compute the secret with k or more shares
-    
+    computeLagrange(alpha, x, k, n);
     // Compute Secret = sum_{i=1}^{k} alpha_i x y_i
     mpz_init(Sr); mpz_init_set_str(Sr, "0", 0);
     mpz_t temp; mpz_init(temp);
     
-    mpz_mul(temp,alpha1,y[0]);
+    mpz_mul(temp,alpha[0],y[0]);
     mpz_add(Sr, Sr, temp);
-    mpz_mul(temp,alpha2,y[1]);
+    mpz_mul(temp,alpha[1],y[1]);
     mpz_add(Sr, Sr, temp);
-    mpz_mul(temp,alpha3,y[2]);
+    mpz_mul(temp,alpha[2],y[2]);
     mpz_add(Sr, Sr, temp);
     mpz_mod(Sr, Sr, p );
     
@@ -207,8 +237,12 @@ int main()
     /* Clean up the GMP integers */
     //mpz_clear(y1);mpz_clear(y2);mpz_clear(y3);mpz_clear(y4);
     //mpz_clear(x1);mpz_clear(x2);mpz_clear(x3);mpz_clear(x4);
-    mpz_clear(alpha1);mpz_clear(alpha2);mpz_clear(alpha3);
+    //mpz_clear(alpha1);mpz_clear(alpha2);mpz_clear(alpha3);
     //mpz_clear(a1);mpz_clear(a2);
+    clear_tab_mpz(x, n);
+    clear_tab_mpz(y, n);
+    clear_tab_mpz(alpha, k);
+    clear_tab_mpz(a, k-1);
     mpz_clear(temp);
     mpz_clear(Sr);
     mpz_clear(S);
