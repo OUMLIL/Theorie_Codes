@@ -79,22 +79,21 @@ void clear_tab_mpz(mpz_t * tab, int t) {
     }
 }
 
-void computeLagrange(mpz_t *alpha, mpz_t * x, int k, int n) {
+void computeLagrange(mpz_t *alpha, mpz_t * x, int k, int n, mpz_t p) {
     init_tab_mpz(alpha, k);
     mpz_t prod; mpz_init(prod);
     mpz_t tmp; mpz_init(tmp);
     for(int i = 0; i < k; i++) {
         mpz_set_str(prod, "1", 0);
-        for(int j = 0; j < n; j++) {
+        for(int j = 0; j < k; j++) {
             if(i != j) {
                 mpz_sub(tmp, x[j], x[i]);
-                mpz_div(tmp, x[j], tmp);
+                mpz_invert(tmp, tmp, p);
+                mpz_mul(tmp, x[j], tmp);
                 mpz_mul(prod, prod, tmp);
             }
         }
         mpz_set(alpha[i], prod);
-        char p_str[1000]; mpz_get_str(p_str,10,alpha[i]);
-        std::cout << "alpha" << i << " = " << p_str << std::endl;
     }
 }
 
@@ -140,10 +139,6 @@ int main()
     /*
      *  Step 1: Initialize Prime Number : we work into Z/pZ
      */
-
-    //mpz_init(p); mpz_init_set_str(p, "11", 0);
-    
-    //TODO: Delete this part and compute a prime number randomly
     generatePrime(p);
     
     if (DEBUG)
@@ -155,10 +150,6 @@ int main()
     /*
      *  Step 2: Initialize Secret Number
      */
-
-    //mpz_init(S); mpz_init_set_str(S, "5", 0);
-    
-    //TODO: Delete this part and compute the secret randomly ( warning: inside Z/pZ )
     generateRandom(S, p);
     
     if (DEBUG)
@@ -170,9 +161,6 @@ int main()
     /*
      *  Step 3: Initialize Coefficient of polynom
      */
-    //mpz_init(a1); generateRandom(a1, p);//mpz_init_set_str(a1, "3", 0);
-    //mpz_init(a2); generateRandom(a2, p);//mpz_init_set_str(a2, "10", 0);
-    //TODO: Delete this part and compute the coeffiecients randomly ( warning: inside Z/pZ )//done 
     generateCoefs(a, p, k-1);
     
     if (DEBUG)
@@ -186,18 +174,6 @@ int main()
     /*
      *  Step 4: Shares computation for each users (xi, yi)
      */
-    /*
-    mpz_init(x1); mpz_init_set_str(x1, "2", 0);
-    mpz_init(x2); mpz_init_set_str(x2, "4", 0);
-    mpz_init(x3); mpz_init_set_str(x3, "6", 0);
-    mpz_init(x4); mpz_init_set_str(x4, "8", 0);
-
-    mpz_init(y1); mpz_init_set_str(y1, "7", 0);
-    mpz_init(y2); mpz_init_set_str(y2, "1", 0);
-    mpz_init(y3); mpz_init_set_str(y3, "9", 0);
-    mpz_init(y4); mpz_init_set_str(y4, "9", 0);
-    */
-    //TODO: Delete this part and compute the shares of all users with public login
     computeShares(x, y, a, S, k-1, n);
 
     
@@ -219,27 +195,10 @@ int main()
     /*
      *  Step 5: Sample for reconstruct the secret with 3 users (x1, x2, x3)
      */
-    /*
-    mpz_init(alpha1); mpz_init_set_str(alpha1, "3", 0);
-    mpz_init(alpha2); mpz_init_set_str(alpha2, "8", 0);
-    mpz_init(alpha3); mpz_init_set_str(alpha3, "1", 0);
-    */
-    //TODO: Delete this part and automatically compute the secret with k or more shares
-    computeLagrange(alpha, x, k, n);
-    // Compute Secret = sum_{i=1}^{k} alpha_i x y_i
-    /*
-    mpz_init(Sr); mpz_init_set_str(Sr, "0", 0);
-    mpz_t temp; mpz_init(temp);
     
-    mpz_mul(temp,alpha[0],y[0]);
-    mpz_add(Sr, Sr, temp);
-    mpz_mul(temp,alpha[1],y[1]);
-    mpz_add(Sr, Sr, temp);
-    mpz_mul(temp,alpha[2],y[2]);
-    mpz_add(Sr, Sr, temp);
-    mpz_mod(Sr, Sr, p );
-    */
-   
+    computeLagrange(alpha, x, k, n, p);
+    // Compute Secret = sum_{i=1}^{k} alpha_i x y_i
+
    reconstructSecret(alpha, y, Sr, p, k);
     if (DEBUG)
     {
@@ -247,15 +206,11 @@ int main()
         std::cout << "Reconstruction of the secret : S = " << Sr_str << std::endl;
     }
     /* Clean up the GMP integers */
-    //mpz_clear(y1);mpz_clear(y2);mpz_clear(y3);mpz_clear(y4);
-    //mpz_clear(x1);mpz_clear(x2);mpz_clear(x3);mpz_clear(x4);
-    //mpz_clear(alpha1);mpz_clear(alpha2);mpz_clear(alpha3);
-    //mpz_clear(a1);mpz_clear(a2);
+
     clear_tab_mpz(x, n);
     clear_tab_mpz(y, n);
     clear_tab_mpz(alpha, k);
     clear_tab_mpz(a, k-1);
-    //mpz_clear(temp);
     mpz_clear(Sr);
     mpz_clear(S);
     mpz_clear(p);
