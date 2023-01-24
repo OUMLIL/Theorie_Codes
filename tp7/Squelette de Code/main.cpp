@@ -30,10 +30,10 @@ void generateRandom(mpz_t &s, mpz_t p) {
 void generateCoefs(mpz_t *tab, mpz_t p, int k) {
     init_tab_mpz(tab, k);
     for(int i = 0; i < k; i++){
-        generateRandom(tab[i], p);
+        do {generateRandom(tab[i], p);} while(check_coefs_different(tab,i,p));
     }
 }
-/*
+
 bool check_coefs_different(mpz_t *tab, int taille, mpz_t e) {
     bool res = false;
     for(int i=0; i < taille; ++i) {
@@ -41,14 +41,12 @@ bool check_coefs_different(mpz_t *tab, int taille, mpz_t e) {
     }
     return res;
 }
-*/
+
 
 void compute_image(mpz_t &image, mpz_t *a, mpz_t x, int k, mpz_t s) {
     mpz_set(image, s);
     mpz_t tmp; mpz_init(tmp);
     for(int j=0; j < k; j++) {
-        //image += mpz_get_ui(a[j])*pow(mpz_get_ui(x),j+1);
-        //std::cout << "a" << j << ": " << mpz_get_ui(a[j]) << " x^" << j << "= " << pow(mpz_get_ui(x),j) << std::endl;
         mpz_pow_ui(tmp, x, j+1);
         mpz_mul(tmp, a[j], tmp);
         mpz_add(image, image, tmp);
