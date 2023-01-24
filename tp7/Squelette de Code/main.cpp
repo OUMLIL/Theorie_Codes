@@ -29,8 +29,10 @@ void generateRandom(mpz_t &s, mpz_t p) {
 
 void generateCoefs(mpz_t *tab, mpz_t p, int k) {
     init_tab_mpz(tab, k);
+    mpz_t temp; mpz_init(temp);
     for(int i = 0; i < k; i++){
-        do {generateRandom(tab[i], p);} while(check_coefs_different(tab,i,p));
+        do {generateRandom(temp, p);} while(check_coefs_different(tab,i,temp));
+        mpz_set(tab[i], temp);
     }
 }
 
@@ -197,12 +199,13 @@ int main()
     computeLagrange(alpha, x, k, n, p);
     // Compute Secret = sum_{i=1}^{k} alpha_i x y_i
 
-   reconstructSecret(alpha, y, Sr, p, k);
+    reconstructSecret(alpha, y, Sr, p, k);
     if (DEBUG)
     {
         char Sr_str[1000]; mpz_get_str(Sr_str,10,Sr);
         std::cout << "Reconstruction of the secret : S = " << Sr_str << std::endl;
     }
+    
     /* Clean up the GMP integers */
 
     clear_tab_mpz(x, n);
