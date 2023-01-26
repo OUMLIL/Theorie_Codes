@@ -235,10 +235,11 @@ int main()
         std::cout << "Login and share of each users : " << "( x1="<< x1_str << " ; y1=" << y1_str << " ) , "  << "( x2="<< x2_str << " ; y2=" << y2_str << " ) , "  << "( x3="<< x3_str << " ; y3=" << y3_str << " ) , "  << "( x4="<< x4_str << " , y4=" << y4_str << " ) , " << "( x5="<< x5_str << " , y5=" << y5_str << " )" << std::endl;
     }
 
-    //change threshold k
+    //Change threshold k
     std::cout << "************* Incrementing threshold *************" << std::endl;
     mpz_t  a_n[k];       // Coefficients of polynom
     mpz_t alpha_n[k+1];  // Lagrangian polynomials in zero
+    mpz_t Sr_n;
 
     init_tab_mpz(a_n, k);
     copyTable(a, a_n, k-1);
@@ -250,8 +251,19 @@ int main()
         char a2_str[1000]; mpz_get_str(a2_str,10,a_n[1]);
         char a3_str[1000]; mpz_get_str(a3_str,10,a_n[2]);
         char S_str[1000];  mpz_get_str(S_str,10,S);
-        std::cout << "Polynom 'P(X)' = " << a3_str << "X^3 + " << a2_str << "X^2 + " << a1_str << "X + " << S_str << std::endl;
+        std::cout << "New Polynom 'P(X)' = " << a3_str << "X^3 + " << a2_str << "X^2 + " << a1_str << "X + " << S_str << std::endl;
     }
+
+    computeLagrange(alpha_n, x_n, k+1, n+1, p);
+
+    reconstructSecret(alpha_n, y_n, Sr_n, p, k+1);
+
+    if (DEBUG)
+    {
+        char Sr_str[1000]; mpz_get_str(Sr_str,10,Sr_n);
+        std::cout << "Reconstruction of the secret(with the new threshold) : S = " << Sr_str << std::endl;
+    }
+
     /* Clean up the GMP integers */
 
     clear_tab_mpz(x, n);
