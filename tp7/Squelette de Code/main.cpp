@@ -206,6 +206,31 @@ int main()
         std::cout << "Reconstruction of the secret : S = " << Sr_str << std::endl;
     }
     
+    //Compute another share
+    mpz_t x_n[n+1];  // Login users
+    mpz_t y_n[n+1];  // Shares of users
+    std::cout << "************* Adding another share *************" << std::endl;
+    computeShares(x_n, y_n, a, S, k, n+1);
+
+    if (DEBUG)
+    {
+        char x1_str[1000]; mpz_get_str(x1_str,10,x_n[0]);
+        char x2_str[1000]; mpz_get_str(x2_str,10,x_n[1]);
+        char x3_str[1000]; mpz_get_str(x3_str,10,x_n[2]);
+        char x4_str[1000]; mpz_get_str(x4_str,10,x_n[3]);
+        char x5_str[1000]; mpz_get_str(x5_str,10,x_n[4]);
+
+        char y1_str[1000]; mpz_get_str(y1_str,10,y_n[0]);
+        char y2_str[1000]; mpz_get_str(y2_str,10,y_n[1]);
+        char y3_str[1000]; mpz_get_str(y3_str,10,y_n[2]);
+        char y4_str[1000]; mpz_get_str(y4_str,10,y_n[3]);
+        char y5_str[1000]; mpz_get_str(y5_str,10,y_n[4]);
+        
+        std::cout << "Login and share of each users : " << "( x1="<< x1_str << " ; y1=" << y1_str << " ) , "  << "( x2="<< x2_str << " ; y2=" << y2_str << " ) , "  << "( x3="<< x3_str << " ; y3=" << y3_str << " ) , "  << "( x4="<< x4_str << " , y4=" << y4_str << " ) , " << "( x5="<< x5_str << " , y5=" << y5_str << " )" << std::endl;
+    }
+    //change threshold k
+
+
     /* Clean up the GMP integers */
 
     clear_tab_mpz(x, n);
