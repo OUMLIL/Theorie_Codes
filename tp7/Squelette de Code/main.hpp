@@ -12,3 +12,4 @@ void computeLagrange(mpz_t *alpha, mpz_t * x, int k, int n, mpz_t p);
 void clear_tab_mpz(mpz_t * tab, int t) ;
 void reconstructSecret(mpz_t * alpha, mpz_t *y, mpz_t Sr, mpz_t p, int k);
 bool check_coefs_different(mpz_t *tab, int taille, mpz_t e);
+void copyTable(mpz_t * a, mpz_t * b, int n);

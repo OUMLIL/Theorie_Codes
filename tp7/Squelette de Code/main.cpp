@@ -107,6 +107,12 @@ void reconstructSecret(mpz_t * alpha, mpz_t *y, mpz_t Sr, mpz_t p, int k) {
     mpz_mod(Sr, Sr, p );
 }
 
+void copyTable(mpz_t * a, mpz_t * b, int n) {
+    for(int i = 0; i < n; i++) {
+        mpz_set(b[i], a[i]);
+    }
+}
+
 /* Main subroutine */
 int main()
 {
@@ -228,9 +234,24 @@ int main()
         
         std::cout << "Login and share of each users : " << "( x1="<< x1_str << " ; y1=" << y1_str << " ) , "  << "( x2="<< x2_str << " ; y2=" << y2_str << " ) , "  << "( x3="<< x3_str << " ; y3=" << y3_str << " ) , "  << "( x4="<< x4_str << " , y4=" << y4_str << " ) , " << "( x5="<< x5_str << " , y5=" << y5_str << " )" << std::endl;
     }
+
     //change threshold k
+    std::cout << "************* Incrementing threshold *************" << std::endl;
+    mpz_t  a_n[k];       // Coefficients of polynom
+    mpz_t alpha_n[k+1];  // Lagrangian polynomials in zero
 
+    init_tab_mpz(a_n, k);
+    copyTable(a, a_n, k-1);
+    generateRandom(a_n[k-1], p);
 
+    if (DEBUG)
+    {
+        char a1_str[1000]; mpz_get_str(a1_str,10,a_n[0]);
+        char a2_str[1000]; mpz_get_str(a2_str,10,a_n[1]);
+        char a3_str[1000]; mpz_get_str(a3_str,10,a_n[2]);
+        char S_str[1000];  mpz_get_str(S_str,10,S);
+        std::cout << "Polynom 'P(X)' = " << a3_str << "X^3 + " << a2_str << "X^2 + " << a1_str << "X + " << S_str << std::endl;
+    }
     /* Clean up the GMP integers */
 
     clear_tab_mpz(x, n);
