@@ -97,10 +97,10 @@ void computeLagrange(mpz_t *alpha, mpz_t * x, int k, int n, mpz_t p) {
     }
 }
 
-void reconstructSecret(mpz_t * alpha, mpz_t *y, mpz_t Sr, mpz_t p, int k) {
+void reconstructSecret(mpz_t * alpha, mpz_t *y, mpz_t Sr, mpz_t p, int start, int k) {
     mpz_init(Sr); mpz_init_set_str(Sr, "0", 0);
     mpz_t temp; mpz_init(temp);
-    for(int i = 0; i < k; i++) {
+    for(int i = start; i < k; i++) {
         mpz_mul(temp,alpha[i],y[i]);
         mpz_add(Sr, Sr, temp);
     }
@@ -205,7 +205,7 @@ int main()
     computeLagrange(alpha, x, k, n, p);
     // Compute Secret = sum_{i=1}^{k} alpha_i x y_i
 
-    reconstructSecret(alpha, y, Sr, p, k);
+    reconstructSecret(alpha, y, Sr, p, 0, k);
     if (DEBUG)
     {
         char Sr_str[1000]; mpz_get_str(Sr_str,10,Sr);
@@ -237,26 +237,13 @@ int main()
 
     //Change threshold k
     std::cout << "************* Incrementing threshold *************" << std::endl;
-    mpz_t  a_n[k];       // Coefficients of polynom
+    //mpz_t  a_n[k];       // Coefficients of polynom
     mpz_t alpha_n[k+1];  // Lagrangian polynomials in zero
     mpz_t Sr_n;
 
-    init_tab_mpz(a_n, k);
-    copyTable(a, a_n, k-1);
-    generateRandom(a_n[k-1], p);
-
-    if (DEBUG)
-    {
-        char a1_str[1000]; mpz_get_str(a1_str,10,a_n[0]);
-        char a2_str[1000]; mpz_get_str(a2_str,10,a_n[1]);
-        char a3_str[1000]; mpz_get_str(a3_str,10,a_n[2]);
-        char S_str[1000];  mpz_get_str(S_str,10,S);
-        std::cout << "New Polynom 'P(X)' = " << a3_str << "X^3 + " << a2_str << "X^2 + " << a1_str << "X + " << S_str << std::endl;
-    }
-
     computeLagrange(alpha_n, x_n, k+1, n+1, p);
 
-    reconstructSecret(alpha_n, y_n, Sr_n, p, k+1);
+    reconstructSecret(alpha_n, y_n, Sr_n, p, 1, k+1);
 
     if (DEBUG)
     {
